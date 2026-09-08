@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Artista | Fora do Site</title>
+</head>
+<body>
+    <header class="hero">
+        <a class="brand" href="../intro/index.html">FORA DO SITE</a>
+        <a id="meu_perfil" class="profile-link" href="../perfil/index.html">Meu perfil</a>
+    </header>
+
+    <main>
+        <section class="artist-header" aria-label="Perfil do artista">
+            <img class="artist-avatar" id="artist-avatar" alt="Avatar do artista">
+            <div class="artist-info">
+                <p class="eyebrow">ARTISTA INDEPENDENTE</p>
+                <h1 class="nome">Carregando...</h1>
+                <p id="titulo">Conheça os trabalhos deste artista.</p>
+                <div class="artist-actions">
+                    <a class="button primary" href="#musicas">Ouvir músicas</a>
+                    <a id="editar_perfil" class="button secondary hidden" href="../perfil/index.html">Editar perfil</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <p class="eyebrow">SOBRE</p>
+            <p class="bio" id="bio">A biografia do artista aparecerá aqui.</p>
+        </section>
+
+        <section id="projetos" class="section-block">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">PORTFÓLIO</p>
+                    <h2>Projetos em destaque</h2>
+                </div>
+                <span class="count">03 projetos</span>
+            </div>
+            <div class="project-grid">
+                <article class="project-card neon-card">
+                    <span class="project-number">01</span>
+                    <p class="tag">VISUAL</p>
+                    <h3>Identidade sonora</h3>
+                    <p>Experimentos, referências e processos que formam o universo do artista.</p>
+                </article>
+                <article class="project-card neon-card">
+                    <span class="project-number">02</span>
+                    <p class="tag">COLABORAÇÃO</p>
+                    <h3>Fora do estúdio</h3>
+                    <p>Encontros criativos e projetos desenvolvidos com a comunidade.</p>
+                </article>
+                <article class="project-card neon-card">
+                    <span class="project-number">03</span>
+                    <p class="tag">LANÇAMENTO</p>
+                    <h3>Próxima faixa</h3>
+                    <p>Uma prévia do que está sendo construído agora.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="musicas" class="section-block">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">CATÁLOGO</p>
+                    <h2>Músicas e beats</h2>
+                </div>
+                <button class="text-button" type="button">Ver todos</button>
+            </div>
+            <div class="track-list">
+                <article class="track"><span>01</span><div><h3>Em construção</h3><p>Single • 2026</p></div><button aria-label="Tocar Em construção">▶</button></article>
+                <article class="track"><span>02</span><div><h3>Frequência livre</h3><p>Beat • 2026</p></div><button aria-label="Tocar Frequência livre">▶</button></article>
+                <article class="track"><span>03</span><div><h3>Depois da noite</h3><p>Demo • 2026</p></div><button aria-label="Tocar Depois da noite">▶</button></article>
+            </div>
+        </section>
+    </main>
+
+    <aside class="social-panel">
+        <p class="eyebrow">ENCONTRE O ARTISTA</p>
+        <div class="redes-sociais"><p class="empty-social">Nenhuma rede social adicionada ainda.</p></div>
+    </aside>
+
+    <script src="desing.js"></script>
+    <script src="api.js"></script>
+</body>
+</html>

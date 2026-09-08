@@ -1,0 +1,26 @@
+{
+  "name": "trysla",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ../backend/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ../backend/server.js",
+    "migrate:supabase": "node scripts/migrate-supabase-to-mongodb.js"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.17.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongodb": "^7.5.0",
+    "multer": "^2.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
