@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>FORA DO SITE — Cultura, Arte e Conexão</title>
+
+<link rel="icon" type="image/png" href="/front-end/intro/img/fds.png">
+<link rel="stylesheet" href="/front-end/intro/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+</head>
+
+<body>
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <header class="header">
+
+        <div class="header-container">
+
+            <!-- LOGO -->
+
+                <a href="#" class="logo">
+                    <img src="/front-end/intro/img/logo.png" alt="FORA DO SITE">
+                </a>
+
+
+            <!-- MENU -->
+
+            <nav class="main-nav">
+            <a href="#inicio" class="nav-link active">INÍCIO</a>
+
+                <a href="#artistas" class="nav-link">
+                    ARTISTAS
+                </a>
+
+                <a href="#profissionais" class="nav-link">
+                    PROFISSIONAIS
+                </a>
+
+                <a href="#servicos" class="nav-link">
+                    SERVIÇOS
+                </a>
+
+                <a href="#projetos" class="nav-link">
+                    PROJETOS
+                </a>
+
+                <a href="sobre/sobre.html" class="nav-link">
+                    SOBRE
+                </a>
+
+            </nav>
+
+
+            <!-- AÇÕES -->
+
+            <div class="header-actions">
+
+                <div class="search-box">
+
+                    <span class="search-icon">
+                        <svg
+                            width="21"
+                            height="21"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="7"
+                            />
+
+                            <line
+                                x1="16"
+                                y1="16"
+                                x2="21"
+                                y2="21"
+                            />
+                        </svg>
+                    </span>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Buscar artistas, profissionais, projetos..."
+                    >
+
+                </div>
+
+
+                <button onclick="window.location.href='/front-end/login/index.html?cadastro=0'" class="btn btn-outline">
+                    ENTRAR
+                </button>
+
+
+                <button onclick="window.location.href='/front-end/login/index.html?cadastro=1'"  class="btn btn-primary">
+                    CRIAR PERFIL
+                </button>
+
+            </div>
+
+
+            <!-- MENU MOBILE -->
+
+            <button
+                class="mobile-menu-button"
+                id="mobileMenuButton"
+                aria-label="Abrir menu"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main>
+
+
+        <!-- =========================
+             HERO
+        ========================== -->
+
+        <section
+            class="hero"
+            id="inicio"
+        >
+
+            <div class="hero-container">
+
+
+                <!-- TEXTO -->
+
+                <div class="hero-content">
+
+                    <h1 class="hero-title">
+
+                        SEU PERFIL.<br>
+
+                        SUA ARTE.<br>
+
+                        <span>SUA REDE.</span>
+
+                    </h1>
+
+
+                    <p class="hero-description">
+
+                        Conecte-se com artistas e profissionais
+                        da cultura de todo o Brasil.
+
+                    </p>
+
+
+                    <div class="hero-buttons">
+
+                        <button class="btn btn-primary btn-large">
+                            EXPLORAR
+                        </button>
+
+                        <button onclick="window.location.href='/front-end/login/index.html?cadastro=1'" class="btn btn-outline btn-large">
+                            CRIAR PERFIL
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- IMAGEM PRINCIPAL -->
+
+                <div class="hero-image">
+
+                   
+                <img src="/front-end/intro/img/hero-artista.png"
+                alt="Artista em destaque"
+                >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             DESTAQUES
+        ========================== -->
+
+        <section class="highlights" id="projetos">
+
+            <div class="highlights-container">
+
+
+                <!-- CATEGORIAS -->
+
+                <div class="highlight-categories">
+
+                    <h2 class="section-label">
+                        DESTAQUES
+                    </h2>
+
+
+                    <div
+                        class="category-list"
+                        id="categoryList"
+                    >
+
+
+                        <article class="category-item">
+
+                            <div class="category-image">
+
+                                <img
+                                    src="/front-end/intro/img/logo.png"
+                                    alt="MCs"
+                                >
+
+                            </div>
+
+                            <span>MC'S</span>
+
+                        </article>
+
+
+                        <article class="category-item">
+
+                            <div class="category-image">
+
+                                <img
+                                    src="/front-end/intro/img/logo.png"
+                                    alt="Produtores"
+                                >
+
+                            </div>
+
+                            <span>PRODUTORES</span>
+
+                        </article>
+
+
+                        <article class="category-item">
+
+                            <div class="category-image">
+
+                                <img
+                                    src="/front-end/intro/img/logo.png"
+                                    alt="Beatmakers"
+                                >
+
+                            </div>
+
+                            <span>BEATMAKERS</span>
+
+                        </article>
+
+
+                        <article class="category-item">
+
+                            <div class="category-image">
+
+                                <img
+                                    src="/front-end/intro/img/logo.png"
+                                    alt="Fotógrafos"
+                                >
+
+                            </div>
+
+                            <span>FOTÓGRAFOS</span>
+
+                        </article>
+
+
+                        <article class="category-item">
+
+                            <div class="category-image">
+
+                                <img
+                                    src="/front-end/intro/img/logo.png"
+                                    alt="Designers"
+                                >
+
+                            </div>
+
+                            <span>DESIGNERS</span>
+
+                        </article>
+
+
+                        <button
+                            class="category-more"
+                            aria-label="Ver mais categorias"
+                        >
+
+                            <span>→</span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DIFERENCIAIS -->
+
+                <div class="features">
+
+                    <div class="feature">
+
+                        <div class="feature-icon">
+                            👥
+                        </div>
+
+                        <span>
+                            PERFIS DE<br>
+                            ARTISTAS E PROFISSIONAIS
+                        </span>
+
+                    </div>
+
+
+                    <div class="feature">
+
+                        <div class="feature-icon">
+                            🔗
+                        </div>
+
+                        <span>
+                            LINKS PARA REDES SOCIAIS,<br>
+                            TRABALHOS E PROJETOS
+                        </span>
+
+                    </div>
+
+
+                    <div class="feature">
+
+                        <div class="feature-icon">
+                            📊
+                        </div>
+
+                        <span>
+                            INSIGHTS E INFORMAÇÕES<br>
+                            DOS PERFIS CONECTADOS
+                        </span>
+
+                    </div>
+
+
+                    <div class="feature">
+
+                        <div class="feature-icon">
+                            📱
+                        </div>
+
+                        <span>
+                            FUTURO APLICATIVO
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             ARTISTAS EM DESTAQUE
+        ========================== -->
+
+        <section
+            class="artists-section"
+            id="artistas"
+        >
+
+            <div class="section-container">
+
+                <h2 class="section-title">
+                    ARTISTAS EM DESTAQUE
+                </h2>
+
+
+                <div
+                    class="artists-grid"
+                    id="artistsGrid"
+                >
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="services-section" id="servicos">
+            <div class="section-container">
+                <h2 class="section-title">SERVIÇOS</h2>
+                <div class="services-grid" id="servicesGrid">
+                    <p class="empty-services">Carregando serviços...</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =========================
+             CATEGORIAS
+        ========================== -->
+
+        <section
+            class="categories-section"
+            id="profissionais"
+        >
+
+            <div class="section-container">
+
+                <h2 class="section-title">
+                    ENCONTRE POR CATEGORIA
+                </h2>
+
+
+                <div class="categories-grid">
+
+
+                    <button class="category-card">
+
+                        <span class="category-card-icon">
+                            ♫
+                        </span>
+
+                        <span>
+                            MÚSICA
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+                    <button class="category-card">
+
+                        <span class="category-card-icon">
+                            🎬
+                        </span>
+
+                        <span>
+                            AUDIOVISUAL
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+                    <button class="category-card">
+
+                        <span class="category-card-icon">
+                            🔗
+                        </span>
+
+                        <span>
+                            ARTES VISUAIS
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+                    <button class="category-card">
+
+                        <span class="category-card-icon">
+                            📖
+                        </span>
+
+                        <span>
+                            LITERATURA
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+                    <button class="category-card">
+
+                        <span class="category-card-icon">
+                            💃
+                        </span>
+
+                        <span>
+                            DANÇA
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+                    <button class="category-card">
+
+                        <span class="category-card-icon">
+                            👕
+                        </span>
+
+                        <span>
+                            MODA
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+                    <button class="category-card">
+
+                        <span class="category-card-icon">
+                            ▦
+                        </span>
+
+                        <span>
+                            VER TODAS
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="footer">
+
+        <div class="footer-container">
+
+
+            <div class="footer-brand">
+
+               <img src="/front-end/intro/img/logo.png" alt="FORA DO SITE">
+
+                <p>
+                    Uma plataforma independente que conecta
+                    quem faz a cultura acontecer.
+                </p>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    NAVEGUE
+                </h3>
+
+                <a href="#artistas">
+                    Artistas
+                </a>
+
+                <a href="#profissionais">
+                    Profissionais
+                </a>
+
+                <a href="#projetos">
+                    Projetos
+                </a>
+
+                <a href="sobre/sobre.html">
+                    Sobre 
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    LEGAL
+                </h3>
+                <a href="../termos-de-uso/termosdeuso.html">Termos De Uso</a>
+                <a href="../politica-de-privacidade/politicadeprivacidade.html">Política De Privacidade</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    SIGA O FDS
+                </h3>
+
+                <div class="social-links">
+
+                    <a href="https://www.instagram.com/foradosite/" aria-label="Instagram">
+                        Instagram
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-newsletter">
+
+                <h3>
+                    RECEBA NOVIDADES
+                </h3>
+
+                <form id="newsletterForm">
+
+                    <input
+                        type="email"
+                        id="newsletterEmail"
+                        placeholder="Seu e-mail"
+                        required
+                    >
+
+                    <button type="submit">
+                        →
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 FORA DO SITE. Todos os direitos reservados.
+            </p>
+
+        </div>
+
+    </footer>
+
+    <!-- JAVASCRIPT -->
+
+    <script src="/front-end/intro/script.js"></script>
+
+</body>
+
+</html>

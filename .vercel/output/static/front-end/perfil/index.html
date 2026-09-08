@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../intro/style.css">
+    <link rel="stylesheet" href="/front-end/perfil/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Meu perfil | Fora do Site</title>
+</head>
+
+<body>
+    <header class="topbar">
+        <a href="../intro/index.html" class="brand" aria-label="Voltar para Fora do Site">
+            <img src="../intro/img/logo.png" alt="FORA DO SITE">
+        </a>
+        <a href="../artista/index.html" class="view-profile">Ver página pública ↗</a>
+    </header>
+    <main class="dashboard">
+        <section class="profile-summary">
+            <input type="file" id="arquivo" hidden>
+            <span>✏️<img onclick="uploadImage()" class="avatar" id="avatar" src="/front-end/intro/img/fds.png" alt="Avatar"></span>
+
+            <div>
+                <p class="eyebrow">PAINEL DO ARTISTA</p>
+                <h1 id="nome">Carregando...</h1>
+                <p id="subtitle">Atualize como as pessoas encontram você.</p>
+            </div>
+        </section>
+
+        <p id="status" role="status"></p>
+
+        <section class="panel">
+            <div class="panel-title">
+                <div>
+                    <p class="eyebrow">IDENTIDADE</p>
+                    <h2>Sobre você</h2>
+                </div><span>Visível no perfil público</span>
+            </div>
+            <form id="bio-form">
+                <label for="titulo">Título / função</label>
+                <input id="titulo" maxlength="80" placeholder="Ex.: Produtor musical e artista visual">
+                <label for="bio">Biografia</label>
+                <textarea id="bio" maxlength="600" rows="5"
+                    placeholder="Conte um pouco sobre você, sua arte e seus projetos."></textarea>
+                <button class="save-button" type="submit">Salvar informações</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="panel-title">
+                <div>
+                    <p class="eyebrow">CONEXÕES</p>
+                    <h2>Redes sociais</h2>
+                </div><span>Adicione links diretos</span>
+            </div>
+            <form id="redes-form" class="social-form">
+                <label for="instagram">Instagram</label>
+                <input id="instagram" type="url" placeholder="https://instagram.com/seuusuario">
+                <label for="youtube">YouTube</label>
+                <input id="youtube" type="url" placeholder="https://youtube.com/@seucanal">
+                <label for="spotify">Spotify</label>
+                <input id="spotify" type="url" placeholder="https://open.spotify.com/artist/...">
+                <label for="tiktok">TikTok</label>
+                <input id="tiktok" type="url" placeholder="https://tiktok.com/@seuusuario">
+                <button class="save-button" type="submit">Salvar redes</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="panel-title">
+                <div>
+                    <p class="eyebrow">CATÁLOGO</p>
+                    <h2>Meus Tracks / Beats</h2>
+                </div>
+                <span>Adicione seus trabalhos</span>
+            </div>
+
+            <form id="track-form" class="track-form">
+
+                <label for="track-name">Nome do beat / track</label>
+                <input id="track-name" maxlength="100" placeholder="Ex.: Midnight Vibes">
+
+                <label for="track-type">Tipo</label>
+                <select id="track-type">
+                    <option value="Música">Música</option>
+                    <option value="projeto">Projeto</option>
+                    <option value="fotografia">Fotografia</option>
+                    <option value="Outro">Outro</option>
+                </select>
+
+                <label>Capa do projeto</label>
+
+                <div class="cover-upload">
+                    <input id="track-cover" type="file" accept="image/*">
+
+                    <div class="upload-box">
+                        <img id="cover-preview" alt="Preview da capa" hidden>
+
+                        <div class="upload-content">
+                            <span class="upload-icon">🖼️</span>
+                            <strong>Escolha uma capa</strong>
+                            <small>PNG, JPG ou WEBP</small>
+                        </div>
+                    </div>
+                </div>
+
+                <label for="track-audio">Link da música</label>
+                <input id="track-audio" type="url" placeholder="https://soundcloud.com/seubeat">
+
+                <label for="track-preview">Prévia de áudio (15 a 30 segundos)</label>
+                <input id="track-preview" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4">
+                <small class="field-help">Envie um trecho curto em MP3, WAV, OGG ou M4A.</small>
+
+                <button class="save-button" type="submit">
+                    Adicionar track
+                </button>
+
+            </form>
+
+            <div id="tracks-list" class="tracks-list">
+                <!-- Os beats adicionados vão aparecer aqui pelo JavaScript -->
+            </div>
+
+        </section>
+
+        <section class="hint">
+            <p class="eyebrow">PRÓXIMOS PASSOS</p>
+            <p>Na sua página pública, apresente músicas, beats e projetos. Seus dados salvos aqui aparecem para quem
+                visitar seu perfil.</p><a href="../artista/index.html">Abrir minha página de artista →</a>
+        </section>
+
+
+
+    </main>
+    <script src="/front-end/perfil/script.js"></script>
+</body>
+
+</html>

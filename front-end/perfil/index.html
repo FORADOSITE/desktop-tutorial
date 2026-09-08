@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Edite seu perfil no FORA DO SITE.">
+    <link rel="icon" type="image/png" href="/front-end/intro/img/fds.png">
+    <link rel="stylesheet" href="/front-end/intro/style.css">
+    <link rel="stylesheet" href="/front-end/perfil/style.css">
+    <title>Meu perfil | FORA DO SITE</title>
+</head>
+<body>
+    <header class="profile-header">
+        <a class="profile-brand" href="/front-end/intro" aria-label="Voltar para o FORA DO SITE">
+            <img src="/front-end/intro/img/logo.png" alt="FORA DO SITE">
+        </a>
+        <span class="header-status"><i></i> PERFIL EM EDIÇÃO</span>
+    </header>
+
+    <main class="profile-layout">
+        <section class="editor-column" aria-labelledby="editor-title">
+            <div class="page-intro">
+                <span class="eyebrow">PAINEL DO ARTISTA</span>
+                <h1 id="editor-title">SUA ARTE.<br><em>SUA REDE.</em></h1>
+                <p>Monte um perfil que mostre quem você é e o que está criando agora.</p>
+            </div>
+
+            <p id="status" class="status" role="status" aria-live="polite"></p>
+
+            <section class="editor-section">
+                <div class="section-heading">
+                    <span>01</span>
+                    <div><span class="eyebrow">IDENTIDADE</span><h2>Sobre você</h2></div>
+                </div>
+                <div class="avatar-editor">
+                    <button class="avatar-button" id="avatar-button" type="button" aria-label="Escolher foto de perfil">
+                        <img id="avatar-preview" src="/front-end/intro/img/fds.png" alt="Prévia da foto de perfil">
+                        <span>+</span>
+                    </button>
+                    <input id="avatar-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+                    <div><strong>Foto de perfil</strong><p>Use uma imagem quadrada para representar seu trabalho.</p></div>
+                </div>
+                <form id="identity-form" class="form-grid">
+                    <label for="profile-name">Nome artístico ou nome</label>
+                    <input id="profile-name" maxlength="80" placeholder="Ex.: Luedji Luna" required>
+                    <label for="profile-role">Título / função</label>
+                    <input id="profile-role" maxlength="90" placeholder="Ex.: Artista, produtora e compositora">
+                    <label for="profile-bio">Bio</label>
+                    <textarea id="profile-bio" maxlength="600" rows="5" placeholder="Conte um pouco sobre sua arte, seus projetos e sua trajetória."></textarea>
+                    <button class="primary-button" type="submit">Salvar identidade</button>
+                </form>
+            </section>
+
+            <section class="editor-section">
+                <div class="section-heading">
+                    <span>02</span>
+                    <div><span class="eyebrow">CONEXÕES</span><h2>Suas redes</h2></div>
+                </div>
+                <form id="social-form" class="form-grid">
+                    <label for="instagram">Instagram</label>
+                    <input id="instagram" type="url" placeholder="https://instagram.com/seuusuario">
+                    <label for="youtube">YouTube</label>
+                    <input id="youtube" type="url" placeholder="https://youtube.com/@seucanal">
+                    <label for="spotify">Spotify</label>
+                    <input id="spotify" type="url" placeholder="https://open.spotify.com/artist/...">
+                    <button class="primary-button" type="submit">Salvar links</button>
+                </form>
+            </section>
+
+            <section class="editor-section">
+                <div class="section-heading">
+                    <span>03</span>
+                    <div><span class="eyebrow">CATÁLOGO</span><h2>Prévias de música</h2></div>
+                </div>
+                <p class="section-note">Adicione trechos entre 15 e 30 segundos para as pessoas conhecerem seu som.</p>
+                <form id="track-form" class="form-grid">
+                    <label for="track-title">Nome da música</label>
+                    <input id="track-title" maxlength="100" placeholder="Ex.: Noite Inteira" required>
+                    <label for="track-link">Link da música completa</label>
+                    <input id="track-link" type="url" placeholder="https://open.spotify.com/..." required>
+                    <label for="track-cover">Capa da música</label>
+                    <input id="track-cover" type="file" accept="image/jpeg,image/png,image/webp">
+                    <label for="track-preview">Arquivo de prévia <small>15–30s</small></label>
+                    <input id="track-preview" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/x-m4a" required>
+                    <button class="primary-button" type="submit">Adicionar prévia</button>
+                </form>
+                <div id="track-list" class="track-list" aria-live="polite"></div>
+            </section>
+        </section>
+
+        <aside class="preview-column" aria-labelledby="preview-title">
+            <div class="preview-label"><span class="eyebrow">PRÉVIA PÚBLICA</span><span>AO VIVO</span></div>
+            <div class="public-profile">
+                <div class="public-cover"></div>
+                <div class="public-content">
+                    <img id="public-avatar" class="public-avatar" src="/front-end/intro/img/fds.png" alt="Foto do perfil">
+                    <span class="public-type">ARTISTA / CRIADOR</span>
+                    <h2 id="public-name">Seu nome</h2>
+                    <p id="public-role">Seu título aparece aqui</p>
+                    <p id="public-bio">Sua bio vai aparecer aqui quando você começar a escrever.</p>
+                    <nav id="social-links" class="social-links" aria-label="Redes sociais"></nav>
+                    <div class="public-tracks">
+                        <div class="tracks-heading"><span>PRÉVIAS</span><span id="track-count">0 faixas</span></div>
+                        <div id="public-tracks-list"><p class="empty-state">Suas músicas aparecerão aqui.</p></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+    <script src="/front-end/perfil/script.js"></script>
+</body>
+</html>

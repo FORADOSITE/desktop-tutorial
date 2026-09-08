@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Entre ou crie seu perfil no FORA DO SITE.">
+    <link rel="icon" type="image/png" href="/front-end/intro/img/fds.png">
+    <title>Entrar | FORA DO SITE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/front-end/intro/style.css">
+    <link rel="stylesheet" href="/front-end/login/style.css">
+</head>
+<body>
+    <main class="auth-page">
+        <section class="auth-story" aria-label="Sobre o FORA DO SITE">
+            <a class="story-logo" href="/front-end/intro" aria-label="Voltar para o início">
+                <img src="/front-end/intro/img/logo.png" alt="FORA DO SITE">
+            </a>
+            <div class="story-copy">
+                <span class="eyebrow">A CULTURA EM MOVIMENTO</span>
+                <h1>SEU LUGAR<br><span>É AQUI.</span></h1>
+                <p>Conecte-se com quem cria, produz e movimenta a cultura em todo o Brasil.</p>
+            </div>
+            <div class="story-index" aria-hidden="true">
+                <span>01</span>
+                <i></i>
+                <span>FDS / 2026</span>
+            </div>
+        </section>
+
+        <section class="auth-panel" aria-labelledby="auth-heading">
+            <div class="panel-topline">
+                <span>ÁREA DE ACESSO</span>
+                <a href="/front-end/intro">Voltar ao início <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="auth-frame">
+                <nav class="auth-switch" aria-label="Alternar entre login e cadastro">
+                    <a href="/front-end/login/index.html?cadastro=0" data-auth-tab="signin">ENTRAR</a>
+                    <a href="/front-end/login/index.html?cadastro=1" data-auth-tab="signup">CRIAR PERFIL</a>
+                </nav>
+                <div class="auth-heading" id="auth-heading">
+                    <span class="section-tag">BEM-VINDO(A)</span>
+                    <h2>ENTRE NA<br><em>SUA REDE.</em></h2>
+                    <p>Seu próximo projeto pode começar aqui.</p>
+                </div>
+                <div id="clerk-auth" aria-live="polite">
+                    <div class="auth-loading"><span></span> Carregando acesso...</div>
+                </div>
+                <p class="auth-legal">Ao continuar, você concorda com os <a href="/termos-de-uso">Termos de Uso</a> e a <a href="/politica-de-privacidade">Política de Privacidade</a>.</p>
+            </div>
+        </section>
+    </main>
+    <script src="/front-end/login/desing.js"></script>
+</body>
+</html>

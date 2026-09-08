@@ -1,0 +1,196 @@
+{
+  "version": 3,
+  "routes": [
+    {
+      "src": "^/(?:(.+)/)?index(?:\\.html)?/?$",
+      "headers": {
+        "Location": "/$1"
+      },
+      "status": 308
+    },
+    {
+      "src": "^/(.*)\\.html/?$",
+      "headers": {
+        "Location": "/$1"
+      },
+      "status": 308
+    },
+    {
+      "src": "^/api$",
+      "dest": "/api/index"
+    },
+    {
+      "src": "^/api/(.*)$",
+      "dest": "/api/[...path]"
+    },
+    {
+      "src": "^/(api(?:.+)?)/index(?:\\.(?:js))?/?$",
+      "headers": {
+        "Location": "/$1"
+      },
+      "status": 308
+    },
+    {
+      "src": "^/api/(.+)(?:\\.(?:js))/?$",
+      "headers": {
+        "Location": "/api/$1"
+      },
+      "status": 308
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/$",
+      "dest": "/front-end/intro/index.html"
+    },
+    {
+      "src": "^/favicon.ico$",
+      "dest": "/front-end/intro/img/fds.png"
+    },
+    {
+      "src": "^/style.css$",
+      "dest": "/front-end/intro/style.css"
+    },
+    {
+      "src": "^/script.js$",
+      "dest": "/front-end/intro/script.js"
+    },
+    {
+      "src": "^/front-end/intro/style.css$",
+      "dest": "/front-end/intro/style.css"
+    },
+    {
+      "src": "^/front-end/intro/script.js$",
+      "dest": "/front-end/intro/script.js"
+    },
+    {
+      "src": "^/img/(.*)$",
+      "dest": "/front-end/intro/img/$1"
+    },
+    {
+      "src": "^/css/(.*)$",
+      "dest": "/front-end/css/$1"
+    },
+    {
+      "src": "^/front-end/intro/img/(.*)$",
+      "dest": "/front-end/intro/img/$1"
+    },
+    {
+      "src": "^/intro/(.*)$",
+      "dest": "/front-end/intro/$1"
+    },
+    {
+      "src": "^/artista/(.*)$",
+      "dest": "/front-end/artista/$1"
+    },
+    {
+      "src": "^/login$",
+      "dest": "/front-end/login/index.html"
+    },
+    {
+      "src": "^/login/(.*)$",
+      "dest": "/front-end/login/$1"
+    },
+    {
+      "src": "^/perfil/(.*)$",
+      "dest": "/front-end/perfil/$1"
+    },
+    {
+      "src": "^/verificar-email/(.*)$",
+      "dest": "/front-end/verificar-email/$1"
+    },
+    {
+      "src": "^/sobre/(.*)$",
+      "dest": "/front-end/intro/sobre/$1"
+    },
+    {
+      "src": "^/sobre$",
+      "dest": "/front-end/intro/sobre/sobre.html"
+    },
+    {
+      "src": "^/termos de uso/(.*)$",
+      "dest": "/front-end/intro/termos de uso/$1"
+    },
+    {
+      "src": "^/termos-de-uso/(.*)$",
+      "dest": "/front-end/intro/termos de uso/$1"
+    },
+    {
+      "src": "^/termos-de-uso$",
+      "dest": "/front-end/intro/termos de uso/termosdeuso.html"
+    },
+    {
+      "src": "^/politica de privacidade/(.*)$",
+      "dest": "/front-end/intro/politica de privacidade/$1"
+    },
+    {
+      "src": "^/politica-de-privacidade/(.*)$",
+      "dest": "/front-end/intro/politica de privacidade/$1"
+    },
+    {
+      "src": "^/politica-de-privacidade$",
+      "dest": "/front-end/intro/politica de privacidade/politicadeprivacidade.html"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/front-end/intro/$1"
+    },
+    {
+      "src": "^/api/([^/]+)$",
+      "dest": "/api/[...path]?...path=$1",
+      "check": true
+    },
+    {
+      "src": "^/api(/.*)?$",
+      "status": 404
+    },
+    {
+      "handle": "error"
+    },
+    {
+      "status": 404,
+      "src": "^(?!/api).*$",
+      "dest": "/404"
+    }
+  ],
+  "overrides": {
+    "front-end/intro/politica de privacidade/politicadeprivacidade.html": {
+      "path": "front-end/intro/politica de privacidade/politicadeprivacidade"
+    },
+    "front-end/intro/sobre/sobre.html": {
+      "path": "front-end/intro/sobre/sobre"
+    },
+    "front-end/intro/termos de uso/termosdeuso.html": {
+      "path": "front-end/intro/termos de uso/termosdeuso"
+    },
+    "front-end/artista/index.html": {
+      "path": "front-end/artista/index"
+    },
+    "front-end/intro/index.html": {
+      "path": "front-end/intro/index"
+    },
+    "front-end/login/index.html": {
+      "path": "front-end/login/index"
+    },
+    "front-end/perfil/index.html": {
+      "path": "front-end/perfil/index"
+    },
+    "front-end/politica-de-privacidade/politicadeprivacidade.html": {
+      "path": "front-end/politica-de-privacidade/politicadeprivacidade"
+    },
+    "front-end/termos-de-uso/termosdeuso.html": {
+      "path": "front-end/termos-de-uso/termosdeuso"
+    },
+    "front-end/verificacao-documento/index.html": {
+      "path": "front-end/verificacao-documento/index"
+    },
+    "front-end/verificar-email/index.html": {
+      "path": "front-end/verificar-email/index"
+    },
+    "index.html": {
+      "path": "index"
+    }
+  },
+  "crons": []
+}

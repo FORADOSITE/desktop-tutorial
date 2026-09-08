@@ -1,0 +1,29 @@
+:root {
+    --ink: #171717;
+    --muted: #6c6c6c;
+    --line: #dedbd4;
+    --paper: #f7f4ee;
+    --accent: #e4572e;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: linear-gradient(135deg, #f7f4ee, #e8eee9); font-family: Inter, Arial, sans-serif; }
+.verification-shell { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; }
+.verification-panel { width: min(680px, 100%); padding: clamp(24px, 5vw, 52px); background: rgba(255, 255, 255, .9); border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(23, 23, 23, .1); }
+.eyebrow { margin: 0 0 12px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+h1 { margin: 0; font-size: clamp(30px, 5vw, 52px); line-height: 1; }
+.intro { max-width: 540px; margin: 18px 0 32px; color: var(--muted); line-height: 1.6; }
+form { display: grid; gap: 10px; }
+label { font-size: 14px; font-weight: 700; }
+input:not([type="file"]):not([type="checkbox"]) { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: inherit; }
+.document-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0; }
+.file-card { display: grid; gap: 8px; min-height: 130px; padding: 18px; border: 1px dashed #aaa49a; background: #fcfbf8; cursor: pointer; }
+.file-card span { color: var(--muted); font-size: 12px; font-weight: 400; }
+.file-card input { width: 100%; font-size: 12px; }
+.consent-row { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; color: var(--muted); font-size: 13px; font-weight: 400; line-height: 1.45; }
+.consent-row input { margin-top: 3px; accent-color: var(--accent); }
+.status { min-height: 22px; margin: 0; color: var(--muted); font-size: 14px; }
+.status.error { color: #b42318; }
+.submit-button { min-height: 50px; border: 0; background: var(--accent); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.submit-button:disabled { cursor: wait; opacity: .6; }
+@media (max-width: 620px) { .document-grid { grid-template-columns: 1fr; } }

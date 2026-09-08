@@ -1,0 +1,32 @@
+/* =========================================================
+   FORA DO SITE - VARIÁVEIS GLOBAIS
+   ========================================================= */
+
+:root {
+    /* Cores de Fundo (Dark) */
+    --black: #050505;
+    --black-soft: #0a0a0a;
+    --black-card: #0d0d0d;
+
+    /* Destaques Neon (Verde Oficial) */
+    --green: #9cff00;
+    --green-dark: #6ea800;
+    --green-glow: rgba(156, 255, 0, 0.25);
+
+    /* Textos */
+    --white: #f2f2f2;
+    --white-soft: #bdbdbd;
+    --gray: #777;
+
+    /* Bordas */
+    --border: rgba(255, 255, 255, 0.10);
+    --border-green: rgba(156, 255, 0, 0.55);
+
+    /* Tipografia Oficial */
+    --font-title: "Barlow Condensed", sans-serif;
+    --font-body: "Inter", sans-serif;
+
+    /* Layout & Transições */
+    --container: 1200px;
+    --transition: 0.3s ease;
+}

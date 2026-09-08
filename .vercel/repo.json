@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_IHuWZByHlhJJNNyky36V8503mAiX",
+      "name": "fora-do-site",
+      "directory": ".",
+      "orgId": "team_38uhtJ8gMmsPx1CnpB3NUxj5"
+    }
+  ]
+}

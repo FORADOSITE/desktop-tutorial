@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre — FORA DO SITE</title>
+    <link rel="icon" type="image/png" href="/img/fds.png">
+    <link rel="stylesheet" href="sobre.css">
+    <!-- Ícones via Lucide / CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo" role="link" tabindex="0" aria-label="Voltar para o início"
+                onclick="window.location.href='../index.html'"
+                onkeydown="if (event.key === 'Enter' || event.key === ' ') window.location.href='../index.html'">
+                <img src="../img/logo.png" alt="FORA DO SITE">
+            </div>
+
+            <nav class="main-nav">
+                                <a href="../index.html" class="nav-link">INÍCIO</a>
+                                <a href="../index.html#artistas" class="nav-link">ARTISTAS</a>
+                                <a href="../index.html#profissionais" class="nav-link">PROFISSIONAIS</a>
+                                <a href="../index.html#projetos" class="nav-link">PROJETOS</a>
+                     <a href="sobre.html" class="nav-link active">SOBRE</a>
+                    </nav>
+
+            <div class="header-search">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" placeholder="Buscar artistas, profissionais">
+            </div>
+
+            <div class="header-actions">
+                <a href="#" class="btn-login">ENTRAR</a>
+                <a href="#" class="btn-create">CRIAR PERFIL</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+
+        <!-- HERO SECTION -->
+        <section class="hero-section">
+            <span class="section-tag">SOBRE O FORA DO SITE</span>
+            <h1 class="hero-title">
+                A CULTURA<br>
+                NÃO CABE<br>
+                EM UMA CAIXA.<br>
+                <span class="highlight-text">A GENTE TAMBÉM NÃO.</span>
+            </h1>
+            <p class="hero-description">
+                O FORA DO SITE nasceu para conectar quem cria, quem produz e quem movimenta a cultura.
+            </p>
+            <a href="#manifesto" class="btn-cta">
+                EXPLORAR A PLATAFORMA <span>→</span>
+            </a>
+        </section>
+
+        <hr class="divider">
+
+        <!-- MANIFESTO -->
+        <section id="manifesto" class="manifesto-section">
+            <div class="step-number">01</div>
+            <div class="manifesto-header">
+                <span class="section-tag">FORA DO SITE</span>
+                <h2>02 MANIFESTO</h2>
+            </div>
+
+            <div class="manifesto-content">
+                <h3 class="manifesto-title">
+                    SEU PERFIL.<br>
+                    SUA ARTE.<br>
+                    SUA REDE.
+                </h3>
+                <p>
+                    Existe muita gente talentosa produzindo coisas incríveis.
+                    Artistas, profissionais e criadores que fazem a cultura acontecer todos os dias.
+                    Mas nem sempre essas pessoas estão no lugar certo para serem encontradas.
+                    O FORA DO SITE existe para mudar isso.
+                </p>
+
+                <h3 class="manifesto-subtitle">MAIS QUE UMA PLATAFORMA.</h3>
+                <p>
+                    Somos uma rede criada para dar visibilidade a quem faz a cultura acontecer.
+                    Um espaço onde diferentes linguagens, trajetórias e áreas se encontram para criar novas possibilidades.
+                    Aqui, seu perfil é mais do que uma página. É sua porta de entrada para uma rede de pessoas, projetos e oportunidades.
+                </p>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- O QUE VOCÊ ENCONTRA AQUI (GRID) -->
+        <section class="features-section">
+            <div class="features-header">
+                <span class="section-tag">03 O QUE VOCÊ ENCONTRA AQUI</span>
+            </div>
+
+            <div class="features-grid">
+                <!-- Card 01 -->
+                <div class="feature-card">
+                    <span class="card-number">01</span>
+                    <i data-lucide="sparkles" class="card-icon"></i>
+                    <h4>ARTISTAS</h4>
+                    <p>Conheça novos talentos e descubra diferentes formas de expressão.</p>
+                </div>
+
+                <!-- Card 02 -->
+                <div class="feature-card">
+                    <span class="card-number">02</span>
+                    <i data-lucide="briefcase" class="card-icon"></i>
+                    <h4>PROFISSIONAIS</h4>
+                    <p>Encontre produtores, técnicos e especialistas para viabilizar seus projetos.</p>
+                </div>
+
+                <!-- Card 03 -->
+                <div class="feature-card">
+                    <span class="card-number">03</span>
+                    <i data-lucide="folder-kanban" class="card-icon"></i>
+                    <h4>PROJETOS</h4>
+                    <p>Descubra iniciativas culturais, editais e oportunidades de colaboração.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="sobre.js"></script>
+    <script>
+        // Inicializa os ícones do Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>
