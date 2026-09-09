@@ -617,7 +617,83 @@ if (
 
 
 /* =========================================================
-   9. NEWSLETTER
+   9. ESCOLHA DE PERFIL
+   ========================================================= */
+
+const categoryDialog = document.getElementById("category-dialog");
+const categoryDialogTitle = document.getElementById("category-dialog-title");
+const categoryDialogDescription = document.getElementById("category-dialog-description");
+const categoryProfileTypes = document.getElementById("category-profile-types");
+const categoryDialogAction = document.querySelector(".category-dialog-action");
+const categoryDialogClose = document.querySelector(".category-dialog-close");
+const profileCategories = {
+    musica: {
+        title: "Música",
+        description: "Apresente sua identidade sonora, seus lançamentos e as colaborações que fazem parte da sua trajetória.",
+        types: ["Artista", "Beatmaker"],
+    },
+    audiovisual: {
+        title: "Audiovisual",
+        description: "Mostre seu olhar para imagens em movimento, do conceito à finalização de cada produção.",
+        types: ["Clipes", "Edições", "Visualizers"],
+    },
+    "artes-visuais": {
+        title: "Artes visuais",
+        description: "Crie um espaço para reunir seu portfólio, processos e obras que traduzem a sua linguagem.",
+        types: ["Pinturas", "Desenhos", "Ilustrações"],
+    },
+    literatura: {
+        title: "Literatura",
+        description: "Dê contexto às suas palavras e conecte leitores aos livros, poemas e histórias que você escreve.",
+        types: ["Livros", "Poemas", "Crônicas"],
+    },
+    danca: {
+        title: "Dança",
+        description: "Compartilhe seu movimento, seus trabalhos e os vídeos que revelam sua presença em cena.",
+        types: ["Vídeos de dança", "Coreografia", "Performance"],
+    },
+    moda: {
+        title: "Moda",
+        description: "Organize um portfólio visual para apresentar seu estilo, suas criações e seus ensaios.",
+        types: ["Fotos", "Styling", "Criação"],
+    },
+    projetos: {
+        title: "Projetos",
+        description: "Apresente uma iniciativa cultural com objetivos, equipe, referências e caminhos para colaboração.",
+        types: ["Projeto cultural", "Coletivo", "Iniciativa"],
+    },
+};
+
+function fecharCategoryDialog() {
+    if (categoryDialog?.open) categoryDialog.close();
+}
+
+document.querySelectorAll("[data-profile-category]").forEach((categoryButton) => {
+    categoryButton.addEventListener("click", () => {
+        const category = profileCategories[categoryButton.dataset.profileCategory];
+        if (!category || !categoryDialog) return;
+
+        categoryDialogTitle.textContent = category.title;
+        categoryDialogDescription.textContent = category.description;
+        categoryProfileTypes.replaceChildren(...category.types.map((type) => {
+            const item = document.createElement("span");
+            item.className = "category-profile-type";
+            item.textContent = type;
+            return item;
+        }));
+        categoryDialogAction.href = `/front-end/login/index.html?cadastro=1&categoria=${encodeURIComponent(category.title)}`;
+        categoryDialog.showModal();
+    });
+});
+
+categoryDialogClose?.addEventListener("click", fecharCategoryDialog);
+categoryDialog?.addEventListener("click", (event) => {
+    if (event.target === categoryDialog) fecharCategoryDialog();
+});
+
+
+/* =========================================================
+   10. NEWSLETTER
    ========================================================= */
 
 if (
@@ -922,44 +998,7 @@ artistCards.forEach(
 
 
 /* =========================================================
-   14. BOTÕES DE CATEGORIA
-   ========================================================= */
-
-const categoryCards =
-    document.querySelectorAll(
-        ".category-card"
-    );
-
-
-categoryCards.forEach(
-    (card) => {
-
-        card.addEventListener(
-            "click",
-            () => {
-
-                const categoryName =
-                    card
-                        .querySelector(
-                            "span:nth-child(2)"
-                        )
-                        ?.textContent ||
-                    "Categoria";
-
-
-                showNotification(
-                    `Buscando perfis de ${categoryName}.`
-                );
-
-            }
-        );
-
-    }
-);
-
-
-/* =========================================================
-   15. BOTÕES DO HERO
+   14. BOTÕES DO HERO
    ========================================================= */
 
 const heroButtons =

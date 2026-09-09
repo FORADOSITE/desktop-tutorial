@@ -1826,3 +1826,109 @@ header,
     }
 
 }
+
+.category-card:focus-visible,
+.category-dialog-close:focus-visible,
+.category-dialog-action:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 4px;
+}
+
+.category-dialog {
+    width: min(calc(100% - 32px), 620px);
+    padding: 0;
+    border: 1px solid var(--border-green);
+    color: var(--white);
+    background: var(--black-card);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+}
+
+.category-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(5px);
+}
+
+.category-dialog-panel {
+    position: relative;
+    padding: clamp(28px, 5vw, 52px);
+}
+
+.category-dialog-close {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    color: var(--white-soft);
+    background: transparent;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.category-dialog-close:hover {
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.category-dialog h2 {
+    max-width: 470px;
+    margin: 0;
+    font-family: var(--font-title);
+    font-size: clamp(44px, 7vw, 72px);
+    line-height: 0.9;
+    text-transform: uppercase;
+}
+
+.category-dialog-description {
+    max-width: 500px;
+    margin: 18px 0 26px;
+    color: var(--white-soft);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.category-profile-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+}
+
+.category-profile-type {
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.category-dialog-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-width: min(100%, 250px);
+}
+
+@media (max-width: 480px) {
+    .category-dialog {
+        width: calc(100% - 24px);
+    }
+
+    .category-dialog-panel {
+        padding: 32px 20px 24px;
+    }
+
+    .category-dialog-close {
+        top: 14px;
+        right: 14px;
+    }
+
+    .category-dialog-action {
+        width: 100%;
+    }
+}

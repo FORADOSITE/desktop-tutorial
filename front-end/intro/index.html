@@ -422,7 +422,7 @@
                 <div class="categories-grid">
 
 
-                    <button class="category-card">
+                    <button class="category-card" type="button" data-profile-category="musica">
 
                         <span class="category-card-icon">
                             ♫
@@ -439,7 +439,7 @@
                     </button>
 
 
-                    <button class="category-card">
+                    <button class="category-card" type="button" data-profile-category="audiovisual">
 
                         <span class="category-card-icon">
                             🎬
@@ -456,7 +456,7 @@
                     </button>
 
 
-                    <button class="category-card">
+                    <button class="category-card" type="button" data-profile-category="artes-visuais">
 
                         <span class="category-card-icon">
                             🔗
@@ -473,7 +473,7 @@
                     </button>
 
 
-                    <button class="category-card">
+                    <button class="category-card" type="button" data-profile-category="literatura">
 
                         <span class="category-card-icon">
                             📖
@@ -490,7 +490,7 @@
                     </button>
 
 
-                    <button class="category-card">
+                    <button class="category-card" type="button" data-profile-category="danca">
 
                         <span class="category-card-icon">
                             💃
@@ -507,7 +507,7 @@
                     </button>
 
 
-                    <button class="category-card">
+                    <button class="category-card" type="button" data-profile-category="moda">
 
                         <span class="category-card-icon">
                             👕
@@ -524,14 +524,14 @@
                     </button>
 
 
-                    <button class="category-card">
+                    <button class="category-card" type="button" data-profile-category="projetos">
 
                         <span class="category-card-icon">
                             ▦
                         </span>
 
                         <span>
-                            VER TODAS
+                            PROJETOS
                         </span>
 
                         <strong>
@@ -545,6 +545,17 @@
             </div>
 
         </section>
+
+        <dialog class="category-dialog" id="category-dialog" aria-labelledby="category-dialog-title">
+            <div class="category-dialog-panel">
+                <button class="category-dialog-close" type="button" aria-label="Fechar seleção">×</button>
+                <span class="eyebrow">PERFIL PERSONALIZADO</span>
+                <h2 id="category-dialog-title">Escolha seu caminho</h2>
+                <p id="category-dialog-description"></p>
+                <div class="category-profile-types" id="category-profile-types"></div>
+                <a class="btn btn-primary category-dialog-action" href="/front-end/login/index.html?cadastro=1">CRIAR ESTE PERFIL <span aria-hidden="true">→</span></a>
+            </div>
+        </dialog>
 
 
     </main>
