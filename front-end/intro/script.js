@@ -675,13 +675,24 @@ document.querySelectorAll("[data-profile-category]").forEach((categoryButton) =>
 
         categoryDialogTitle.textContent = category.title;
         categoryDialogDescription.textContent = category.description;
-        categoryProfileTypes.replaceChildren(...category.types.map((type) => {
-            const item = document.createElement("span");
+        let selectedType = category.types[0];
+        const updateAction = () => {
+            categoryDialogAction.href = `/front-end/login/index.html?cadastro=1&categoria=${encodeURIComponent(category.title)}&tipo=${encodeURIComponent(selectedType)}`;
+        };
+        categoryProfileTypes.replaceChildren(...category.types.map((type, index) => {
+            const item = document.createElement("button");
+            item.type = "button";
             item.className = "category-profile-type";
             item.textContent = type;
+            item.classList.toggle("selected", index === 0);
+            item.addEventListener("click", () => {
+                selectedType = type;
+                categoryProfileTypes.querySelectorAll(".category-profile-type").forEach((option) => option.classList.toggle("selected", option === item));
+                updateAction();
+            });
             return item;
         }));
-        categoryDialogAction.href = `/front-end/login/index.html?cadastro=1&categoria=${encodeURIComponent(category.title)}`;
+        updateAction();
         categoryDialog.showModal();
     });
 });

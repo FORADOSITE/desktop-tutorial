@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Escolha o tipo do seu perfil no FORA DO SITE.">
+    <link rel="icon" type="image/png" href="/front-end/intro/img/fds.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/front-end/escolha-perfil/style.css">
+    <title>Escolha seu perfil | FORA DO SITE</title>
+</head>
+<body>
+    <main class="profile-choice-page">
+        <header class="choice-header">
+            <a href="/front-end/intro" aria-label="Voltar para o início"><img src="/front-end/intro/img/logo.png" alt="FORA DO SITE"></a>
+            <span>CONFIGURAÇÃO DO PERFIL</span>
+        </header>
+        <section class="choice-intro" aria-labelledby="choice-title">
+            <span class="eyebrow">ANTES DE COMEÇAR</span>
+            <h1 id="choice-title">QUAL É O<br><em>SEU CAMINHO?</em></h1>
+            <p>Escolha uma opção para montar um perfil com os campos certos para o seu trabalho.</p>
+        </section>
+        <form id="profile-choice-form">
+            <div class="choice-grid">
+                <button class="choice-card selected" type="button" data-category="Música" data-type="Artista">
+                    <span class="choice-number">01</span><strong>Artista</strong><small>Prévias e identidade musical</small><i>↗</i>
+                </button>
+                <button class="choice-card" type="button" data-category="Música" data-type="Beatmaker">
+                    <span class="choice-number">02</span><strong>Beatmaker</strong><small>Contato profissional, sem venda de beats</small><i>↗</i>
+                </button>
+                <button class="choice-card" type="button" data-category="Moda" data-type="Moda">
+                    <span class="choice-number">03</span><strong>Moda</strong><small>Portfólio com fotos</small><i>↗</i>
+                </button>
+                <button class="choice-card" type="button" data-category="Audiovisual" data-type="Audiovisual">
+                    <span class="choice-number">04</span><strong>Audiovisual</strong><small>Vídeos de 15 a 30 segundos</small><i>↗</i>
+                </button>
+                <button class="choice-card" type="button" data-category="Artes visuais" data-type="Artes visuais">
+                    <span class="choice-number">05</span><strong>Artes visuais</strong><small>Até cinco fotos de obras</small><i>↗</i>
+                </button>
+                <button class="choice-card" type="button" data-category="Literatura" data-type="Literatura">
+                    <span class="choice-number">06</span><strong>Literatura</strong><small>Livros e poesias em PDF</small><i>↗</i>
+                </button>
+                <button class="choice-card" type="button" data-category="Projetos" data-type="Projetos">
+                    <span class="choice-number">07</span><strong>Projetos</strong><small>Editais, shows e batalhas</small><i>↗</i>
+                </button>
+            </div>
+            <p id="choice-status" role="status" aria-live="polite"></p>
+            <button class="continue-button" type="submit">Continuar para o perfil <span aria-hidden="true">→</span></button>
+        </form>
+    </main>
+    <script src="/front-end/escolha-perfil/script.js"></script>
+</body>
+</html>

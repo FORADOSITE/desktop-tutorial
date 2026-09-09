@@ -1,5 +1,10 @@
 const authContainer = document.getElementById("clerk-auth");
 const cadastro = new URLSearchParams(window.location.search).get("cadastro") === "1";
+const params = new URLSearchParams(window.location.search);
+const categoria = params.get("categoria") || localStorage.getItem("fora-do-site-category") || "Música";
+const tipo = params.get("tipo") || localStorage.getItem("fora-do-site-profile-type") || "Artista";
+localStorage.setItem("fora-do-site-category", categoria);
+localStorage.setItem("fora-do-site-profile-type", tipo);
 document.documentElement.dataset.authMode = cadastro ? "signup" : "signin";
 const isLocalDevelopment = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
     && window.location.port !== "3000";
@@ -128,7 +133,7 @@ async function iniciarClerk() {
     if (window.Clerk.user) {
         const verificado = await verificarDocumentacao();
         window.location.href = verificado
-            ? "/front-end/perfil/index.html"
+            ? "/front-end/escolha-perfil/index.html"
             : "/front-end/verificacao-documento/index.html";
         return;
     }
@@ -138,7 +143,7 @@ async function iniciarClerk() {
 
     const signInOptions = {
         routing: "hash",
-        signUpUrl: "/front-end/login/index.html?cadastro=1",
+        signUpUrl: `/front-end/login/index.html?cadastro=1&categoria=${encodeURIComponent(categoria)}`,
         afterSignInUrl: "/front-end/verificacao-documento/index.html",
         appearance: clerkAppearance,
     };
@@ -146,7 +151,7 @@ async function iniciarClerk() {
     if (cadastro) {
         window.Clerk.mountSignUp(authContainer, {
             routing: "hash",
-            signInUrl: "/front-end/login/index.html?cadastro=0",
+            signInUrl: `/front-end/login/index.html?cadastro=0&categoria=${encodeURIComponent(categoria)}`,
             afterSignUpUrl: "/front-end/verificar-email/index.html",
             appearance: clerkAppearance,
         });

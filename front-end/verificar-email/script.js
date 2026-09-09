@@ -33,7 +33,7 @@ async function verificarConfirmacao() {
     await carregarClerk();
     if (emailAddress?.verification?.status === "verified") {
         sessionStorage.removeItem("email_pendente_confirmacao");
-        window.location.href = "/front-end/verificacao-documento/index.html";
+        window.location.href = "/front-end/escolha-perfil/index.html";
         return true;
     }
     return false;
