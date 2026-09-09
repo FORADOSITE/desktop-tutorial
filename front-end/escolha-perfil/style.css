@@ -61,3 +61,13 @@ h1 em { color: var(--green); font-style: normal; }
     .choice-intro { padding-top: 55px; }
     .choice-grid { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 380px) {
+    .profile-choice-page { width: min(100% - 28px, 1120px); }
+    .choice-header { align-items: flex-start; gap: 12px; }
+    .choice-header span { max-width: 92px; text-align: right; line-height: 1.35; }
+    .choice-intro { padding-top: 42px; }
+    h1 { font-size: 56px; }
+    .choice-card { min-height: 150px; padding: 16px; }
+    .choice-card strong { margin-top: 18px; font-size: 27px; }
+}

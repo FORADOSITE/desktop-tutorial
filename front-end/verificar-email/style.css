@@ -29,3 +29,11 @@ button:disabled { opacity: 0.6; cursor: wait; }
     body { align-items: start; padding: 16px 12px; }
     .email-box { margin-top: 12px; }
 }
+
+@media (max-width: 360px) {
+    body { padding-right: 10px; padding-left: 10px; }
+    .email-box { padding: 24px 18px; }
+    h1 { font-size: 40px; }
+    .description,
+    .notice { font-size: 0.85rem; }
+}

@@ -127,7 +127,7 @@ const server = http.createServer((request, response) => {
     const authorization = request.headers.authorization || "";
     const allowedOrigins = new Set(["http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000", "http://127.0.0.1:3000"]);
     const origin = request.headers.origin;
-    if (origin && allowedOrigins.has(origin)) response.allowedOrigin = origin;
+    if (origin && (allowedOrigins.has(origin) || origin === "null")) response.allowedOrigin = origin;
     if (request.method === "OPTIONS") {
         setSecurityHeaders(response);
         if (response.allowedOrigin) response.setHeader("Access-Control-Allow-Origin", response.allowedOrigin);

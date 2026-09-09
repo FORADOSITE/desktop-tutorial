@@ -51,3 +51,11 @@ input:focus { border-color: var(--verification-green); box-shadow: 0 0 0 3px var
     .document-grid { grid-template-columns: 1fr; }
     .file-card { min-height: 116px; }
 }
+
+@media (max-width: 380px) {
+    .verification-panel { padding: 24px 14px; }
+    .verification-brand { width: min(180px, 80%); }
+    .intro { margin-bottom: 24px; font-size: 14px; }
+    .file-card { padding: 14px; }
+    .file-card input { max-width: 100%; }
+}

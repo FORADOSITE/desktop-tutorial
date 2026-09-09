@@ -4,6 +4,11 @@ const message = document.getElementById("message");
 const resendButton = document.getElementById("resend");
 const continueButton = document.getElementById("continue");
 let emailAddress;
+const isLocalDevelopment = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
+    && window.location.port !== "3000";
+const apiBase = window.location.protocol === "file:" || isLocalDevelopment
+    ? "http://localhost:3000/api"
+    : "/api";
 
 function carregarScript(src, attributes = {}) {
     return new Promise((resolve, reject) => {
@@ -18,7 +23,9 @@ function carregarScript(src, attributes = {}) {
 }
 
 async function carregarClerk() {
-    const config = await fetch("/api/config").then((response) => response.json());
+    const response = await fetch(`${apiBase}/config`);
+    if (!response.ok) throw new Error("Não foi possível conectar à API. Inicie o servidor em localhost:3000.");
+    const config = await response.json();
     if (!config.clerkPublishableKey) throw new Error("A autenticação ainda não está configurada.");
     const clerkDomain = atob(config.clerkPublishableKey.split("_")[2]).slice(0, -1);
     await carregarScript(`https://${clerkDomain}/npm/@clerk/ui@1/dist/ui.browser.js`);
