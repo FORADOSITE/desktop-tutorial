@@ -4,7 +4,6 @@ const path = require("path");
 
 const rootDir = path.resolve(__dirname, "..");
 const envFile = path.join(__dirname, ".env");
-const port = Number(process.env.PORT || 3000);
 const mimeTypes = {
     ".css": "text/css; charset=utf-8",
     ".gif": "image/gif",
@@ -24,6 +23,8 @@ if (fs.existsSync(envFile)) {
         }
     });
 }
+
+const port = Number(process.env.PORT || 3000);
 
 function sendJson(response, statusCode, body) {
     setSecurityHeaders(response);
@@ -125,7 +126,13 @@ function readRequestBody(request, callback) {
 const server = http.createServer((request, response) => {
     const requestUrl = new URL(request.url, `http://${request.headers.host || "localhost"}`);
     const authorization = request.headers.authorization || "";
-    const allowedOrigins = new Set(["http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000", "http://127.0.0.1:3000"]);
+    const allowedOrigins = new Set([
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        ...(process.env.ALLOWED_ORIGINS || "").split(",").map((value) => value.trim()).filter(Boolean),
+    ]);
     const origin = request.headers.origin;
     if (origin && (allowedOrigins.has(origin) || origin === "null")) response.allowedOrigin = origin;
     if (request.method === "OPTIONS") {
@@ -204,6 +211,10 @@ const server = http.createServer((request, response) => {
     serveFile(response, requestUrl.pathname);
 });
 
-server.listen(port, "127.0.0.1", () => {
-    console.log(`Servidor local em http://localhost:${port}`);
-});
+if (require.main === module) {
+    server.listen(port, process.env.HOST || "127.0.0.1", () => {
+        console.log(`Servidor local em http://localhost:${port}`);
+    });
+}
+
+module.exports = server;
