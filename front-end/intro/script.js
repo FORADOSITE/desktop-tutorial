@@ -28,6 +28,9 @@ const searchInput =
 const artistsGrid =
     document.getElementById("artistsGrid");
 
+const featuredProfiles =
+    document.getElementById("featuredProfiles");
+
 const categoryList =
     document.getElementById("categoryList");
 
@@ -304,6 +307,32 @@ window.addEventListener(
     6.1 - FILTRAR ARTISTAS
    ========================================================= */
 
+function renderArtistCards(profiles, target) {
+    target.innerHTML = "";
+    profiles.forEach((usuario) => {
+        const article = document.createElement("article");
+        article.className = "artist-card";
+        article.innerHTML = `
+            <div class="artist-image">
+                <img src="/front-end/intro/img/fds.png" alt="">
+                <span class="artist-tag">ARTISTA</span>
+            </div>
+            <div class="artist-info"><h3></h3><p></p></div>
+        `;
+        const image = article.querySelector("img");
+        image.src = usuario.image_perfil || "/front-end/intro/img/fds.png";
+        image.alt = usuario.nome || "Artista";
+        image.onerror = () => { image.src = "/front-end/intro/img/fds.png"; };
+        article.querySelector("h3").textContent = usuario.nome || "Artista";
+        article.querySelector("p").textContent = usuario.titulo || "Artista independente";
+        article.addEventListener("click", () => {
+            window.location.href = `../artista/index.html?perfil=${encodeURIComponent(usuario.slug || usuario.nome)}`;
+        });
+        target.appendChild(article);
+        observeRevealElement(article);
+    });
+}
+
 fetch(`${apiURL}/usuario/destaques`)
     .then((response) => {
         if (!response.ok) {
@@ -319,34 +348,8 @@ fetch(`${apiURL}/usuario/destaques`)
             return;
         }
 
-        data.forEach((usuario) => {
-            const article = document.createElement("article");
-            article.className = "artist-card";
-
-            article.innerHTML = `
-                <div class="artist-image">
-                    <img src="/front-end/intro/img/fds.png" alt="">
-                    <span class="artist-tag">ARTISTA</span>
-                </div>
-                <div class="artist-info">
-                    <h3></h3>
-                    <p></p>
-                </div>
-            `;
-            const image = article.querySelector("img");
-            image.src = usuario.image_perfil || "/front-end/intro/img/fds.png";
-            image.alt = usuario.nome || "Artista";
-            image.onerror = () => { image.src = "/front-end/intro/img/fds.png"; };
-            article.querySelector("h3").textContent = usuario.nome || "Artista";
-            article.querySelector("p").textContent = usuario.titulo || "Artista independente";
-
-            article.addEventListener("click", () => {
-                window.location.href = `../artista/index.html?nome=${encodeURIComponent(usuario.nome)}`;
-            });
-
-            artistsGrid.appendChild(article);
-            observeRevealElement(article);
-        });
+        renderArtistCards(data, artistsGrid);
+        if (featuredProfiles) renderArtistCards(data, featuredProfiles);
     })
     .catch((error) => {
         console.error("Erro ao carregar destaques:", error);

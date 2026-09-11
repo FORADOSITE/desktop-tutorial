@@ -40,11 +40,18 @@ async function syncFeaturedProfile() {
                 titulo: profileState.role,
                 bio: profileState.bio,
                 image_perfil: profileState.avatarUrl,
+                ativo: true,
             }),
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        if (!result.success || !result.profile?.ativo) throw new Error("Perfil não foi ativado");
+        profileState.ativo = true;
+        saveState();
+        return true;
     } catch (error) {
         console.error("Não foi possível publicar o perfil nos destaques:", error);
+        return false;
     }
 }
 
@@ -68,7 +75,11 @@ async function saveAndViewProfile() {
 
     saveState();
     renderProfile();
-    await syncFeaturedProfile();
+    const activated = await syncFeaturedProfile();
+    if (!activated) {
+        showStatus("Não foi possível ativar o perfil agora. Tente novamente.", true);
+        return;
+    }
     window.location.href = "/front-end/artista/index.html?me=1";
 }
 

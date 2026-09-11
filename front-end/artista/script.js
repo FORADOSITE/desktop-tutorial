@@ -15,6 +15,10 @@ function readLocalProfile() {
     }
 }
 
+function normalizeName(value) {
+    return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 function setText(id, value) {
     document.getElementById(id).textContent = value || "";
 }
@@ -94,7 +98,7 @@ function renderProfile(profile) {
     avatar.alt = profile.name || profile.nome || "Perfil";
     avatar.onerror = () => { avatar.src = defaultAvatar; };
     const publicUrl = new URL(window.location.href);
-    publicUrl.search = `?nome=${encodeURIComponent(profileName)}`;
+    publicUrl.search = `?perfil=${encodeURIComponent(profile.slug || profileName)}`;
     shareUrl = publicUrl.toString();
     document.getElementById("share-profile").disabled = false;
     renderSocials(profile);
@@ -137,6 +141,7 @@ async function loadProfile() {
     }
 
     const name = params.get("nome");
+    const slug = params.get("perfil");
     if (!name) {
         document.getElementById("profile-status").textContent = "Perfil não encontrado.";
         return;
@@ -145,7 +150,7 @@ async function loadProfile() {
         const response = await fetch(`${apiBase}/usuario/destaques`);
         if (!response.ok) throw new Error("Falha ao carregar perfil");
         const profiles = await response.json();
-        const profile = profiles.find((item) => item.nome === name);
+        const profile = profiles.find((item) => (slug && (item.slug === slug || normalizeName(item.nome).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === slug)) || (name && normalizeName(item.nome) === normalizeName(name)));
         if (!profile) throw new Error("Perfil não encontrado");
         renderProfile(profile);
     } catch (error) {

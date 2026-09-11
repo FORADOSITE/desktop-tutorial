@@ -81,11 +81,13 @@ function saveFeaturedProfile(profile) {
     const existingIndex = profiles.findIndex((item) => normalizeName(item.nome) === normalizedName);
     const savedProfile = {
         nome: String(profile.nome).trim().slice(0, 80),
+        slug: normalizedName.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
         titulo: String(profile.titulo || "Artista independente").trim().slice(0, 90),
         bio: String(profile.bio || "").trim().slice(0, 600),
         image_perfil: typeof profile.image_perfil === "string" && profile.image_perfil.startsWith("data:image/")
             ? profile.image_perfil.slice(0, 8 * 1024 * 1024)
             : null,
+        ativo: profile.ativo === true,
     };
     if (existingIndex === -1) profiles.push(savedProfile);
     else profiles[existingIndex] = savedProfile;
@@ -250,7 +252,7 @@ const server = http.createServer((request, response) => {
                     sendJson(response, 400, { success: false, error: "Informe o nome do perfil." });
                     return;
                 }
-                sendJson(response, 201, { success: true, profile: saveFeaturedProfile(profile) });
+                sendJson(response, 201, { success: true, profile: saveFeaturedProfile({ ...profile, ativo: true }) });
             } catch {
                 sendJson(response, 400, { success: false, error: "Dados de perfil inválidos." });
             }
@@ -272,7 +274,7 @@ const server = http.createServer((request, response) => {
     }
 
     if (requestUrl.pathname === "/api/usuario/destaques") {
-        sendJson(response, 200, loadFeaturedProfiles());
+        sendJson(response, 200, loadFeaturedProfiles().filter((profile) => profile.ativo !== false));
         return;
     }
 
