@@ -5,6 +5,7 @@ const { verifyToken } = require("@clerk/backend");
 
 const rootDir = path.resolve(__dirname, "..");
 const envFile = path.join(__dirname, ".env");
+const profilesFile = path.join(__dirname, "data", "profiles.json");
 const mimeTypes = {
     ".css": "text/css; charset=utf-8",
     ".gif": "image/gif",
@@ -64,6 +65,34 @@ function serveFile(response, requestPath) {
 
 const localVerifiedUsers = new Set();
 const acceptedDocumentTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+function loadFeaturedProfiles() {
+    try {
+        const profiles = JSON.parse(fs.readFileSync(profilesFile, "utf8"));
+        return Array.isArray(profiles) ? profiles : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveFeaturedProfile(profile) {
+    const profiles = loadFeaturedProfiles();
+    const normalizedName = normalizeName(profile.nome);
+    const existingIndex = profiles.findIndex((item) => normalizeName(item.nome) === normalizedName);
+    const savedProfile = {
+        nome: String(profile.nome).trim().slice(0, 80),
+        titulo: String(profile.titulo || "Artista independente").trim().slice(0, 90),
+        bio: String(profile.bio || "").trim().slice(0, 600),
+        image_perfil: typeof profile.image_perfil === "string" && profile.image_perfil.startsWith("data:image/")
+            ? profile.image_perfil.slice(0, 8 * 1024 * 1024)
+            : null,
+    };
+    if (existingIndex === -1) profiles.push(savedProfile);
+    else profiles[existingIndex] = savedProfile;
+    fs.mkdirSync(path.dirname(profilesFile), { recursive: true });
+    fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
+    return savedProfile;
+}
 
 async function getAuthenticatedUserId(authorization) {
     const token = authorization.replace(/^Bearer\s+/i, "").trim();
@@ -213,6 +242,22 @@ const server = http.createServer((request, response) => {
         return;
     }
 
+    if (request.method === "POST" && requestUrl.pathname === "/api/usuario/destaques") {
+        readRequestBody(request, (body) => {
+            try {
+                const profile = body ? JSON.parse(body.toString("utf8")) : {};
+                if (!profile.nome || !String(profile.nome).trim()) {
+                    sendJson(response, 400, { success: false, error: "Informe o nome do perfil." });
+                    return;
+                }
+                sendJson(response, 201, { success: true, profile: saveFeaturedProfile(profile) });
+            } catch {
+                sendJson(response, 400, { success: false, error: "Dados de perfil inválidos." });
+            }
+        });
+        return;
+    }
+
     if (![
         "GET",
         "HEAD",
@@ -221,8 +266,13 @@ const server = http.createServer((request, response) => {
         return;
     }
 
-    if (requestUrl.pathname === "/api/servicos" || requestUrl.pathname === "/api/usuario/destaques") {
+    if (requestUrl.pathname === "/api/servicos") {
         sendJson(response, 200, []);
+        return;
+    }
+
+    if (requestUrl.pathname === "/api/usuario/destaques") {
+        sendJson(response, 200, loadFeaturedProfiles());
         return;
     }
 

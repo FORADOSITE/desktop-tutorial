@@ -1,6 +1,9 @@
 const defaultAvatar = "/front-end/intro/img/fds.png";
 const storageKey = "fora-do-site-profile";
 const categoryStorageKey = "fora-do-site-category";
+const apiBase = window.location.protocol === "file:" || ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname) && window.location.port !== "3000"
+    ? "http://localhost:3000/api"
+    : "/api";
 const storedCategory = localStorage.getItem(categoryStorageKey) || "Música";
 const storedProfileType = localStorage.getItem("fora-do-site-profile-type") || "Artista";
 const profileCategory = storedCategory === "Música" ? storedProfileType : storedCategory;
@@ -24,6 +27,25 @@ function showStatus(message, error = false) {
     const status = document.getElementById("status");
     status.textContent = message;
     status.classList.toggle("error", error);
+}
+
+async function syncFeaturedProfile() {
+    if (!profileState.name) return;
+    try {
+        const response = await fetch(`${apiBase}/usuario/destaques`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nome: profileState.name,
+                titulo: profileState.role,
+                bio: profileState.bio,
+                image_perfil: profileState.avatarUrl,
+            }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+        console.error("Não foi possível publicar o perfil nos destaques:", error);
+    }
 }
 
 function setValue(id, value = "") {
@@ -347,6 +369,7 @@ document.getElementById("identity-form").addEventListener("submit", (event) => {
     profileState.bio = document.getElementById("profile-bio").value.trim();
     saveState();
     renderProfile();
+    syncFeaturedProfile();
     showStatus("Identidade salva.");
 });
 

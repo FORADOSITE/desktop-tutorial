@@ -325,14 +325,20 @@ fetch(`${apiURL}/usuario/destaques`)
 
             article.innerHTML = `
                 <div class="artist-image">
-                    <img src="${usuario.image_perfil || "/front-end/intro/img/fds.png"}" onerror="this.onerror=null;this.src='/front-end/intro/img/fds.png'" alt="${usuario.nome}">
+                    <img src="/front-end/intro/img/fds.png" alt="">
                     <span class="artist-tag">ARTISTA</span>
                 </div>
                 <div class="artist-info">
-                    <h3>${usuario.nome || "Artista"}</h3>
-                    <p>${usuario.titulo || "Artista independente"}</p>
+                    <h3></h3>
+                    <p></p>
                 </div>
             `;
+            const image = article.querySelector("img");
+            image.src = usuario.image_perfil || "/front-end/intro/img/fds.png";
+            image.alt = usuario.nome || "Artista";
+            image.onerror = () => { image.src = "/front-end/intro/img/fds.png"; };
+            article.querySelector("h3").textContent = usuario.nome || "Artista";
+            article.querySelector("p").textContent = usuario.titulo || "Artista independente";
 
             article.addEventListener("click", () => {
                 window.location.href = `../artista/index.html?nome=${encodeURIComponent(usuario.nome)}`;
