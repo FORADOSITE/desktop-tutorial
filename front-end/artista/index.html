@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Perfil público no FORA DO SITE.">
+    <link rel="icon" type="image/png" href="/front-end/intro/img/fds.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/front-end/artista/style.css">
+    <title>Perfil | FORA DO SITE</title>
+</head>
+<body>
+    <header class="public-header">
+        <a href="/front-end/intro/" aria-label="Voltar para o início"><img src="/front-end/intro/img/logo.png" alt="FORA DO SITE"></a>
+        <div class="header-actions">
+            <a class="back-link" href="/front-end/intro/">Página inicial <span aria-hidden="true">→</span></a>
+            <button class="share-link" id="share-profile" type="button" disabled>Copiar link <span aria-hidden="true">↗</span></button>
+            <a class="edit-link" id="edit-profile" href="/front-end/perfil/index.html">Editar <span aria-hidden="true">↗</span></a>
+        </div>
+    </header>
+
+    <main class="profile-page">
+        <p id="profile-status" class="profile-status" role="status" aria-live="polite">Carregando perfil...</p>
+        <section class="public-profile" aria-labelledby="profile-name">
+            <div class="cover"></div>
+            <div class="profile-content">
+                <img id="profile-avatar" class="profile-avatar" src="/front-end/intro/img/fds.png" alt="">
+                <span id="profile-type" class="profile-type">ARTISTA / CRIADOR</span>
+                <h1 id="profile-name">Seu nome</h1>
+                <p id="profile-role" class="profile-role"></p>
+                <p id="profile-bio" class="profile-bio"></p>
+                <nav id="social-links" class="social-links" aria-label="Redes sociais"></nav>
+                <section id="tracks-section" class="profile-section" hidden>
+                    <div class="section-heading"><span>PRÉVIAS</span><span id="track-count">0 faixas</span></div>
+                    <div id="tracks-list"></div>
+                </section>
+                <section id="projects-section" class="profile-section" hidden>
+                    <div class="section-heading"><span>PROJETOS</span><span id="project-count">0 projetos</span></div>
+                    <div id="projects-list"></div>
+                </section>
+            </div>
+        </section>
+    </main>
+    <script src="/front-end/artista/script.js"></script>
+</body>
+</html>

@@ -48,6 +48,30 @@ async function syncFeaturedProfile() {
     }
 }
 
+async function saveAndViewProfile() {
+    const name = document.getElementById("profile-name").value.trim();
+    if (!name) {
+        showStatus("Informe seu nome antes de continuar.", true);
+        document.getElementById("profile-name").focus();
+        return;
+    }
+
+    profileState.name = name;
+    profileState.role = document.getElementById("profile-role").value.trim();
+    profileState.bio = document.getElementById("profile-bio").value.trim();
+    profileState.socials = {
+        instagram: document.getElementById("instagram").value.trim(),
+        youtube: document.getElementById("youtube").value.trim(),
+        spotify: document.getElementById("spotify").value.trim(),
+    };
+    if (!Object.entries(profileState.socials).every(([network, value]) => validateUrl(value, network))) return;
+
+    saveState();
+    renderProfile();
+    await syncFeaturedProfile();
+    window.location.href = "/front-end/artista/index.html?me=1";
+}
+
 function setValue(id, value = "") {
     document.getElementById(id).value = value;
 }
@@ -360,6 +384,13 @@ document.getElementById("avatar-input").addEventListener("change", (event) => {
     document.getElementById("public-avatar").src = pendingAvatarUrl;
     saveState();
     showStatus("Foto de perfil atualizada.");
+});
+
+document.getElementById("view-profile-button").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    await saveAndViewProfile();
+    button.disabled = false;
 });
 
 document.getElementById("identity-form").addEventListener("submit", (event) => {

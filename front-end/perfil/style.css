@@ -41,8 +41,11 @@ body::before {
 
 .profile-brand { width: 170px; }
 .profile-brand img { width: 100%; height: auto; }
+.header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .home-button { margin-left: auto; margin-right: 28px; padding: 11px 14px; border: 1px solid var(--profile-line); color: var(--profile-white); font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-decoration: none; text-transform: uppercase; transition: border-color 0.2s ease, color 0.2s ease; }
 .home-button:hover { border-color: var(--profile-green); color: var(--profile-green); }
+.view-profile-button { padding: 12px 14px; border: 1px solid var(--profile-green); color: var(--profile-black); background: var(--profile-green); font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.view-profile-button:disabled { cursor: wait; opacity: 0.6; }
 .header-status { color: var(--profile-muted); font-size: 10px; font-weight: 700; letter-spacing: 0.15em; }
 .header-status i { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--profile-green); box-shadow: 0 0 12px var(--profile-green); }
 
@@ -66,7 +69,7 @@ body::before {
 
 .editor-section { padding: 40px 0; border-bottom: 1px solid var(--profile-line); }
 .section-heading { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 28px; }
-.section-heading > span { color: var(--profile-green); font-family: "Barlow Condensed", sans-serif; font-size: 30px; line-height: 0.8; }
+.section-heading > span { flex: 0 0 30px; color: var(--profile-green); font-family: "Barlow Condensed", sans-serif; font-size: 30px; line-height: 1; }
 .section-heading h2 { margin: 0; font-family: "Barlow Condensed", sans-serif; font-size: 36px; font-weight: 700; line-height: 0.9; text-transform: uppercase; }
 .section-note { margin: -10px 0 22px 50px; color: var(--profile-muted); font-size: 13px; line-height: 1.6; }
 .form-grid { display: grid; gap: 10px; max-width: 660px; }
@@ -149,7 +152,9 @@ body::before {
     .profile-header, .profile-layout { width: min(calc(100% - 36px), 1240px); }
     .profile-header { min-height: 70px; }
     .profile-brand { width: 140px; }
-    .home-button { margin-right: 12px; padding: 9px 10px; font-size: 8px; }
+    .header-actions { gap: 6px; }
+    .home-button { margin-right: 0; padding: 9px 10px; font-size: 8px; }
+    .view-profile-button { padding: 9px 10px; font-size: 8px; }
     .header-status { font-size: 8px; }
     .profile-layout { padding-top: 42px; }
     .page-intro h1 { font-size: 70px; }
@@ -157,8 +162,9 @@ body::before {
 }
 
 @media (max-width: 420px) {
+    .profile-brand { width: 110px; }
     .header-status {
-        max-width: 110px;
+        max-width: 86px;
         text-align: right;
         line-height: 1.4;
     }

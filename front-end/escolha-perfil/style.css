@@ -42,7 +42,7 @@ h1 em { color: var(--green); font-style: normal; }
 .choice-card { position: relative; min-height: 170px; padding: 20px; border: 1px solid var(--line); color: var(--white); background: var(--card); text-align: left; cursor: pointer; transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease; }
 .choice-card:hover, .choice-card.selected { border-color: var(--green); transform: translateY(-3px); }
 .choice-card.selected { background: #13200d; box-shadow: 0 12px 30px rgba(156, 255, 0, 0.09); }
-.choice-number { display: block; color: var(--green); font-family: "Barlow Condensed", sans-serif; font-size: 28px; }
+.choice-number { display: block; min-height: 32px; color: var(--green); font-family: "Barlow Condensed", sans-serif; font-size: 28px; line-height: 1.15; }
 .choice-card strong { display: block; margin-top: 24px; overflow-wrap: anywhere; font-family: "Barlow Condensed", sans-serif; font-size: 30px; text-transform: uppercase; }
 .choice-card small { display: block; max-width: 190px; margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 .choice-card i { position: absolute; right: 18px; bottom: 17px; color: var(--green); font-size: 21px; font-style: normal; }
