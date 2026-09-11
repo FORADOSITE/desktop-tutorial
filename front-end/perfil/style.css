@@ -150,12 +150,11 @@ body::before {
 
 @media (max-width: 560px) {
     .profile-header, .profile-layout { width: min(calc(100% - 36px), 1240px); }
-    .profile-header { min-height: 70px; }
+    .profile-header { min-height: 70px; padding: 12px 0; }
     .profile-brand { width: 140px; }
-    .header-actions { gap: 6px; }
-    .home-button { margin-right: 0; padding: 9px 10px; font-size: 8px; }
-    .view-profile-button { padding: 9px 10px; font-size: 8px; }
-    .header-status { font-size: 8px; }
+    .header-actions { width: 100%; margin-left: 0; gap: 6px; }
+    .home-button, .view-profile-button { flex: 1; margin: 0; padding: 9px 10px; font-size: 8px; text-align: center; white-space: nowrap; }
+    .header-status { display: none; }
     .profile-layout { padding-top: 42px; }
     .page-intro h1 { font-size: 70px; }
     .public-content { padding-right: 20px; padding-left: 20px; }

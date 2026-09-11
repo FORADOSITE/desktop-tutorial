@@ -75,11 +75,7 @@ async function saveAndViewProfile() {
 
     saveState();
     renderProfile();
-    const activated = await syncFeaturedProfile();
-    if (!activated) {
-        showStatus("Não foi possível ativar o perfil agora. Tente novamente.", true);
-        return;
-    }
+    syncFeaturedProfile();
     window.location.href = "/front-end/artista/index.html?me=1";
 }
 
