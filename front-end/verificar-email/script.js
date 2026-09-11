@@ -1,6 +1,9 @@
 const email = sessionStorage.getItem("email_pendente_confirmacao") || new URLSearchParams(window.location.search).get("email");
 const emailElement = document.getElementById("email");
 const message = document.getElementById("message");
+const verificationForm = document.getElementById("verification-form");
+const verificationCode = document.getElementById("verification-code");
+const verifyCodeButton = document.getElementById("verify-code");
 const resendButton = document.getElementById("resend");
 const continueButton = document.getElementById("continue");
 let emailAddress;
@@ -46,20 +49,49 @@ async function verificarConfirmacao() {
     return false;
 }
 
+async function prepararVerificacao() {
+    await carregarClerk();
+    if (!emailAddress) throw new Error("Sua sessão expirou. Volte ao cadastro e tente novamente.");
+    if (emailAddress.verification?.status !== "verified") {
+        await emailAddress.prepareVerification({ strategy: "email_code" });
+    }
+}
+
 if (email) emailElement.textContent = email;
 else {
     emailElement.textContent = "o e-mail usado no cadastro";
+    verificationForm.querySelectorAll("input, button").forEach((element) => { element.disabled = true; });
     resendButton.disabled = true;
     message.textContent = "Volte ao cadastro para informar seu e-mail novamente.";
 }
+
+if (email) {
+    prepararVerificacao().catch((error) => {
+        message.textContent = error.message;
+    });
+}
+
+verificationForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    verifyCodeButton.disabled = true;
+    message.textContent = "Validando código...";
+    try {
+        await carregarClerk();
+        if (!emailAddress) throw new Error("Sua sessão expirou. Volte ao cadastro e tente novamente.");
+        await emailAddress.attemptVerification({ code: verificationCode.value.trim() });
+        sessionStorage.removeItem("email_pendente_confirmacao");
+        window.location.href = "/front-end/escolha-perfil/index.html";
+    } catch (error) {
+        message.textContent = error.message;
+        verifyCodeButton.disabled = false;
+    }
+});
 
 resendButton.addEventListener("click", async () => {
     resendButton.disabled = true;
     message.textContent = "Enviando...";
     try {
-        await carregarClerk();
-        if (!emailAddress) throw new Error("Sua sessão expirou. Volte ao cadastro e tente novamente.");
-        await emailAddress.prepareVerification({ strategy: "email_code" });
+        await prepararVerificacao();
         message.textContent = "Novo e-mail enviado. Confira sua caixa de entrada.";
     } catch (error) {
         message.textContent = error.message;

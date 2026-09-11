@@ -19,6 +19,10 @@ h1 { margin: 0 0 18px; font-family: "Barlow Condensed", sans-serif; font-size: c
 .description { color: #b7cdbb; line-height: 1.65; }
 .description strong { color: #f3fff5; }
 .notice { margin: 24px 0; padding: 13px; border-left: 2px solid #9cff00; background: rgba(156, 255, 0, 0.06); color: #b4cbb8; font-size: 0.9rem; line-height: 1.45; }
+label { display: block; margin-bottom: 7px; color: #b7cdbb; font-size: 0.85rem; font-weight: 700; }
+input { width: 100%; min-height: 46px; padding: 12px; border: 1px solid #315b3a; border-radius: 3px; background: #080d09; color: #effff2; font: inherit; }
+input:focus { outline: 2px solid #9cff00; outline-offset: 2px; }
+input::placeholder { color: #66806c; }
 button { width: 100%; min-height: 46px; margin-top: 10px; padding: 13px; border: 0; border-radius: 3px; background: #9cff00; color: #031005; font: inherit; font-weight: 800; cursor: pointer; }
 button + button { color: #effff2; background: transparent; border: 1px solid #315b3a; }
 button:disabled { opacity: 0.6; cursor: wait; }

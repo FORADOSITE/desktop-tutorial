@@ -11,8 +11,13 @@
         <a href="/front-end/intro/index.html" class="email-brand">FORA DO SITE</a>
         <p class="eyebrow">QUASE LÁ</p>
         <h1>Confirme seu e-mail</h1>
-        <p class="description">Enviamos um link de confirmação para <strong id="email">seu e-mail</strong>. Confirme sua conta e volte para continuar o cadastro.</p>
-        <div class="notice">O link pode levar alguns minutos. Confira também a pasta de spam.</div>
+        <p class="description">Enviamos um código e um link de confirmação para <strong id="email">seu e-mail</strong>. Use qualquer uma das opções para continuar o cadastro.</p>
+        <div class="notice">O e-mail pode levar alguns minutos. Confira também a pasta de spam.</div>
+        <form id="verification-form">
+            <label for="verification-code">Código de verificação</label>
+            <input id="verification-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
+            <button id="verify-code" type="submit">Confirmar código</button>
+        </form>
         <button id="resend" type="button">Reenviar e-mail</button>
         <button id="continue" type="button">Já confirmei meu e-mail</button>
         <p id="message" role="status"></p>
