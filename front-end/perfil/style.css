@@ -33,7 +33,7 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: min(100% - 64px, 1240px);
+    width: min(calc(100% - 64px), 1240px);
     min-height: 82px;
     margin: 0 auto;
     border-bottom: 1px solid var(--profile-line);
@@ -48,7 +48,7 @@ body::before {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
     gap: clamp(42px, 7vw, 110px);
-    width: min(100% - 64px, 1240px);
+    width: min(calc(100% - 64px), 1240px);
     margin: 0 auto;
     padding: 72px 0 110px;
 }
@@ -98,7 +98,7 @@ body::before {
 .public-content { padding: 0 28px 30px; }
 .public-avatar { width: 96px; height: 96px; margin-top: -48px; border: 3px solid var(--profile-card); border-radius: 50%; object-fit: cover; background: #111; box-shadow: 0 0 0 1px var(--profile-green); }
 .public-type { display: block; margin-top: 20px; color: var(--profile-green); font-size: 9px; font-weight: 800; letter-spacing: 0.18em; }
-.public-content h2 { margin: 8px 0 0; font-family: "Barlow Condensed", sans-serif; font-size: 48px; line-height: 0.9; text-transform: uppercase; }
+.public-content h2 { margin: 8px 0 0; overflow-wrap: anywhere; font-family: "Barlow Condensed", sans-serif; font-size: 48px; line-height: 0.9; text-transform: uppercase; }
 #public-role { margin: 9px 0 0; color: var(--profile-muted); font-size: 13px; }
 #public-bio { margin: 22px 0; color: #c6c9c0; font-size: 13px; line-height: 1.65; }
 .social-links { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 0; border-top: 1px solid var(--profile-line); border-bottom: 1px solid var(--profile-line); }
@@ -144,7 +144,7 @@ body::before {
 }
 
 @media (max-width: 560px) {
-    .profile-header, .profile-layout { width: min(100% - 36px, 1240px); }
+    .profile-header, .profile-layout { width: min(calc(100% - 36px), 1240px); }
     .profile-header { min-height: 70px; }
     .profile-brand { width: 140px; }
     .header-status { font-size: 8px; }
@@ -166,6 +166,7 @@ body::before {
     .section-note { margin-left: 42px; }
     .avatar-editor { align-items: flex-start; flex-wrap: wrap; }
     .primary-button { width: 100%; }
+    .profile-header, .profile-layout { width: calc(100% - 28px); }
     .editor-track,
     .editor-project { grid-template-columns: 46px minmax(0, 1fr); }
     .editor-track img,

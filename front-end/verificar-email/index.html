@@ -18,8 +18,10 @@
             <input id="verification-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
             <button id="verify-code" type="submit">Confirmar código</button>
         </form>
-        <button id="resend" type="button">Reenviar e-mail</button>
-        <button id="continue" type="button">Já confirmei meu e-mail</button>
+        <div class="email-actions">
+            <button id="resend" type="button">Reenviar e-mail</button>
+            <button id="continue" type="button">Já confirmei meu e-mail</button>
+        </div>
         <p id="message" role="status"></p>
         <a class="back" href="/front-end/login/index.html">Voltar ao login</a>
     </main>
