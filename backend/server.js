@@ -1,6 +1,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const { verifyToken } = require("@clerk/backend");
 
 const rootDir = path.resolve(__dirname, "..");
 const envFile = path.join(__dirname, ".env");
@@ -63,6 +64,19 @@ function serveFile(response, requestPath) {
 
 const localVerifiedUsers = new Set();
 const acceptedDocumentTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+async function getAuthenticatedUserId(authorization) {
+    const token = authorization.replace(/^Bearer\s+/i, "").trim();
+    if (!token || !process.env.CLERK_SECRET_KEY) return null;
+
+    try {
+        const claims = await verifyToken(token, { secretKey: process.env.CLERK_SECRET_KEY });
+        return claims.sub || null;
+    } catch (error) {
+        console.error("Falha ao validar token Clerk:", error.message);
+        return null;
+    }
+}
 
 function isAdult(dateValue) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return false;
@@ -160,7 +174,9 @@ const server = http.createServer((request, response) => {
     }
 
     if (requestUrl.pathname === "/api/usuario/status") {
-        sendJson(response, 200, { verificado: Boolean(authorization && localVerifiedUsers.has(authorization)) });
+        getAuthenticatedUserId(authorization).then((userId) => {
+            sendJson(response, 200, { verificado: Boolean(userId && localVerifiedUsers.has(userId)) });
+        });
         return;
     }
 
@@ -169,28 +185,30 @@ const server = http.createServer((request, response) => {
             const fields = body && parseMultipart(request, body);
             const frente = fields?.documento_frente;
             const verso = fields?.documento_verso;
-            if (!authorization) {
-                sendJson(response, 401, { success: false, error: "Faça login para continuar." });
-                return;
-            }
-            if (!fields?.nome || fields.aceite_documentos !== "on") {
-                sendJson(response, 400, { success: false, error: "Informe seu nome e autorize o uso dos documentos." });
-                return;
-            }
-            if (!fields.nome_conta || normalizeName(fields.nome) !== normalizeName(fields.nome_conta)) {
-                sendJson(response, 409, { success: false, code: "NOME_DIVERGENTE", error: "O nome precisa ser o mesmo usado no cadastro." });
-                return;
-            }
-            if (!isAdult(fields.data_nascimento)) {
-                sendJson(response, 403, { success: false, code: "IDADE_MINIMA", error: "É necessário ter 18 anos ou mais para criar um perfil." });
-                return;
-            }
-            if (!hasValidImageSignature(frente) || !hasValidImageSignature(verso)) {
-                sendJson(response, 400, { success: false, error: "Envie fotos JPEG, PNG ou WEBP válidas da frente e do verso do RG." });
-                return;
-            }
-            localVerifiedUsers.add(authorization);
-            sendJson(response, 201, { success: true });
+            getAuthenticatedUserId(authorization).then((userId) => {
+                if (!userId) {
+                    sendJson(response, 401, { success: false, error: "Faça login para continuar." });
+                    return;
+                }
+                if (!fields?.nome || fields.aceite_documentos !== "on") {
+                    sendJson(response, 400, { success: false, error: "Informe seu nome e autorize o uso dos documentos." });
+                    return;
+                }
+                if (!fields.nome_conta || normalizeName(fields.nome) !== normalizeName(fields.nome_conta)) {
+                    sendJson(response, 409, { success: false, code: "NOME_DIVERGENTE", error: "O nome precisa ser o mesmo usado no cadastro." });
+                    return;
+                }
+                if (!isAdult(fields.data_nascimento)) {
+                    sendJson(response, 403, { success: false, code: "IDADE_MINIMA", error: "É necessário ter 18 anos ou mais para criar um perfil." });
+                    return;
+                }
+                if (!hasValidImageSignature(frente) || !hasValidImageSignature(verso)) {
+                    sendJson(response, 400, { success: false, error: "Envie fotos JPEG, PNG ou WEBP válidas da frente e do verso do RG." });
+                    return;
+                }
+                localVerifiedUsers.add(userId);
+                sendJson(response, 201, { success: true });
+            });
         });
         return;
     }

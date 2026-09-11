@@ -1,0 +1,12 @@
+{
+  "name": "fora-do-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.17.2"
+  }
+}
