@@ -26,7 +26,7 @@ function carregarScript(src, attributes = {}) {
 }
 
 async function carregarClerk() {
-    if (window.Clerk?.user) {
+    if (window.Clerk?.user && window.Clerk?.session) {
         clerkUser = window.Clerk.user;
         return clerkUser;
     }
@@ -85,13 +85,19 @@ function showStatus(message, error = false) {
 async function syncFeaturedProfile() {
     if (!profileState.name) return;
     try {
+        const user = await carregarClerk();
+        const token = await window.Clerk.session?.getToken();
+        if (!token) throw new Error("Sua sessão expirou. Entre novamente para publicar o perfil.");
         const response = await fetch(`${apiBase}/usuario/destaques`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({
                 nome: profileState.name,
-                usuario: window.Clerk?.user?.username || profileState.name,
-                email: window.Clerk?.user?.primaryEmailAddress?.emailAddress || "",
+                usuario: user.username || profileState.name,
+                email: user.primaryEmailAddress?.emailAddress || "",
                 titulo: profileState.role,
                 bio: profileState.bio,
                 image_perfil: profileState.avatarUrl,
@@ -138,9 +144,9 @@ async function saveAndViewProfile() {
     const synced = await syncFeaturedProfile();
     if (!synced) {
         showStatus("Perfil salvo neste dispositivo. A publicação será tentada novamente.", true);
-    } else {
-        showStatus("Perfil salvo e publicado.");
+        return;
     }
+    showStatus("Perfil salvo e publicado.");
     window.location.href = "/front-end/artista/index.html?me=1";
 }
 

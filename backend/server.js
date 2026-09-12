@@ -592,18 +592,24 @@ const server = http.createServer((request, response) => {
 
     if (request.method === "POST" && requestUrl.pathname === "/api/usuario/destaques") {
         readRequestBody(request, (body) => {
-            try {
-                const profile = body ? JSON.parse(body.toString("utf8")) : {};
-                if (!profile.nome || !String(profile.nome).trim()) {
-                    sendJson(response, 400, { success: false, error: "Informe o nome do perfil." });
+            getAuthenticatedUserInfo(authorization).then((claims) => {
+                if (!claims?.sub) {
+                    sendJson(response, 401, { success: false, error: "Faça login para publicar o perfil." });
                     return;
                 }
-                const savedProfile = saveFeaturedProfile({ ...profile, ativo: true });
-                sendJson(response, 201, { success: true, profile: savedProfile });
-            } catch (error) {
-                const message = error?.message || "Dados de perfil inválidos.";
-                sendJson(response, 409, { success: false, error: message });
-            }
+                try {
+                    const profile = body ? JSON.parse(body.toString("utf8")) : {};
+                    if (!profile.nome || !String(profile.nome).trim()) {
+                        sendJson(response, 400, { success: false, error: "Informe o nome do perfil." });
+                        return;
+                    }
+                    const savedProfile = saveFeaturedProfile({ ...profile, ativo: true });
+                    sendJson(response, 201, { success: true, profile: savedProfile });
+                } catch (error) {
+                    const message = error?.message || "Dados de perfil inválidos.";
+                    sendJson(response, 409, { success: false, error: message });
+                }
+            });
         });
         return;
     }
