@@ -79,11 +79,15 @@ function saveFeaturedProfile(profile) {
     const profiles = loadFeaturedProfiles();
     const normalizedName = normalizeName(profile.nome);
     const existingIndex = profiles.findIndex((item) => normalizeName(item.nome) === normalizedName);
+    const existingProfile = existingIndex === -1 ? null : profiles[existingIndex];
     const savedProfile = {
         nome: String(profile.nome).trim().slice(0, 80),
         slug: normalizedName.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
         titulo: String(profile.titulo || "Artista independente").trim().slice(0, 90),
         bio: String(profile.bio || "").trim().slice(0, 600),
+        categoria: String(profile.categoria || existingProfile?.categoria || "Música").trim().slice(0, 40),
+        tipo: String(profile.tipo || existingProfile?.tipo || "Artista").trim().slice(0, 40),
+        acessos: Number.isFinite(Number(profile.acessos)) ? Number(profile.acessos) : Number(existingProfile?.acessos || 0),
         image_perfil: typeof profile.image_perfil === "string" && profile.image_perfil.startsWith("data:image/")
             ? profile.image_perfil.slice(0, 8 * 1024 * 1024)
             : null,
@@ -94,6 +98,15 @@ function saveFeaturedProfile(profile) {
     fs.mkdirSync(path.dirname(profilesFile), { recursive: true });
     fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
     return savedProfile;
+}
+
+function incrementFeaturedProfileAccess(slug) {
+    const profiles = loadFeaturedProfiles();
+    const profile = profiles.find((item) => item.slug === slug);
+    if (!profile) return null;
+    profile.acessos = Number(profile.acessos || 0) + 1;
+    fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
+    return profile;
 }
 
 async function getAuthenticatedUserId(authorization) {
@@ -255,6 +268,22 @@ const server = http.createServer((request, response) => {
                 sendJson(response, 201, { success: true, profile: saveFeaturedProfile({ ...profile, ativo: true }) });
             } catch {
                 sendJson(response, 400, { success: false, error: "Dados de perfil inválidos." });
+            }
+        });
+        return;
+    }
+
+    if (request.method === "POST" && requestUrl.pathname === "/api/usuario/destaques/acesso") {
+        readRequestBody(request, (body) => {
+            try {
+                const { slug } = body ? JSON.parse(body.toString("utf8")) : {};
+                if (!slug || !incrementFeaturedProfileAccess(String(slug))) {
+                    sendJson(response, 404, { success: false, error: "Perfil não encontrado." });
+                    return;
+                }
+                sendJson(response, 200, { success: true });
+            } catch {
+                sendJson(response, 400, { success: false, error: "Dados de acesso inválidos." });
             }
         });
         return;

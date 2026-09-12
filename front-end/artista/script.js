@@ -19,6 +19,10 @@ function normalizeName(value) {
     return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLowerCase();
 }
 
+function createSlug(value) {
+    return normalizeName(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 function setText(id, value) {
     document.getElementById(id).textContent = value || "";
 }
@@ -56,37 +60,6 @@ function renderTracks(tracks = []) {
     });
 }
 
-function renderProjects(projects = []) {
-    const section = document.getElementById("projects-section");
-    const list = document.getElementById("projects-list");
-    const labels = { edital: "Edital", show: "Show", batalha: "Batalha" };
-    list.replaceChildren();
-    section.hidden = !projects.length;
-    document.getElementById("project-count").textContent = `${projects.length} ${projects.length === 1 ? "projeto" : "projetos"}`;
-    projects.forEach((project) => {
-        const item = document.createElement("article");
-        item.className = "public-project";
-        item.innerHTML = `<img alt=""><div><span></span><p></p><small></small></div>`;
-        item.querySelector("img").src = project.logoUrl || defaultAvatar;
-        item.querySelector("span").textContent = labels[project.type] || "Projeto";
-        item.querySelector("p").textContent = project.description || "";
-        item.querySelector("small").textContent = project.type === "show"
-            ? [project.email, project.phoneOne, project.phoneTwo].filter(Boolean).join(" | ")
-            : project.type === "batalha"
-                ? [project.date, project.time, project.location].filter(Boolean).join(" | ")
-                : "PDF do edital disponível";
-        if (project.pdfUrl) {
-            const link = document.createElement("a");
-            link.href = project.pdfUrl;
-            link.target = "_blank";
-            link.rel = "noreferrer";
-            link.textContent = "Abrir edital em PDF";
-            item.querySelector("div").appendChild(link);
-        }
-        list.appendChild(item);
-    });
-}
-
 function renderProfile(profile) {
     const profileName = profile.name || profile.nome || "Perfil sem nome";
     setText("profile-type", profile.type || profile.category || "Artista / Criador");
@@ -98,12 +71,12 @@ function renderProfile(profile) {
     avatar.alt = profile.name || profile.nome || "Perfil";
     avatar.onerror = () => { avatar.src = defaultAvatar; };
     const publicUrl = new URL(window.location.href);
-    publicUrl.search = `?perfil=${encodeURIComponent(profile.slug || profileName)}`;
+    publicUrl.search = "";
+    publicUrl.searchParams.set("perfil", profile.slug || createSlug(profileName));
     shareUrl = publicUrl.toString();
     document.getElementById("share-profile").disabled = false;
     renderSocials(profile);
     renderTracks(profile.tracks);
-    renderProjects(profile.projects);
     document.getElementById("profile-status").textContent = "";
 }
 
@@ -129,6 +102,15 @@ async function copyProfileLink() {
     }, 2500);
 }
 
+function registerProfileAccess(slug) {
+    return fetch(`${apiBase}/usuario/destaques/acesso`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+        keepalive: true,
+    }).catch(() => {});
+}
+
 async function loadProfile() {
     const editLink = document.getElementById("edit-profile");
     editLink.hidden = !isOwner;
@@ -150,9 +132,10 @@ async function loadProfile() {
         const response = await fetch(`${apiBase}/usuario/destaques`);
         if (!response.ok) throw new Error("Falha ao carregar perfil");
         const profiles = await response.json();
-        const profile = profiles.find((item) => (slug && (item.slug === slug || normalizeName(item.nome).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === slug)) || (name && normalizeName(item.nome) === normalizeName(name)));
+        const profile = profiles.find((item) => (slug && (item.slug === slug || createSlug(item.nome) === slug)) || (name && normalizeName(item.nome) === normalizeName(name)));
         if (!profile) throw new Error("Perfil não encontrado");
         renderProfile(profile);
+        registerProfileAccess(profile.slug || createSlug(profile.nome));
     } catch (error) {
         console.error(error);
         document.getElementById("profile-status").textContent = "Não foi possível carregar este perfil agora.";

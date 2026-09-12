@@ -37,6 +37,8 @@ const categoryList =
 const servicesGrid =
     document.getElementById("servicesGrid");
 
+let availableProfiles = [];
+
 const newsletterForm =
     document.getElementById("newsletterForm");
 
@@ -315,7 +317,7 @@ function renderArtistCards(profiles, target) {
         article.innerHTML = `
             <div class="artist-image">
                 <img src="/front-end/intro/img/fds.png" alt="">
-                <span class="artist-tag">ARTISTA</span>
+                <span class="artist-tag"></span>
             </div>
             <div class="artist-info"><h3></h3><p></p></div>
         `;
@@ -325,12 +327,40 @@ function renderArtistCards(profiles, target) {
         image.onerror = () => { image.src = "/front-end/intro/img/fds.png"; };
         article.querySelector("h3").textContent = usuario.nome || "Artista";
         article.querySelector("p").textContent = usuario.titulo || "Artista independente";
+        article.querySelector(".artist-tag").textContent = usuario.tipo || usuario.categoria || "ARTISTA";
         article.addEventListener("click", () => {
-            window.location.href = `../artista/index.html?perfil=${encodeURIComponent(usuario.slug || usuario.nome)}`;
+            const slug = usuario.slug || createProfileSlug(usuario.nome);
+            window.location.href = `../artista/index.html?perfil=${encodeURIComponent(slug)}`;
         });
         target.appendChild(article);
         observeRevealElement(article);
     });
+}
+
+function normalizeCategory(value) {
+    return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+function createProfileSlug(value) {
+    return normalizeCategory(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function profilesForCategory(categoryKey) {
+    if (["musica", "artista"].includes(categoryKey)) {
+        return availableProfiles.filter((profile) => !profile.categoria || ["musica", "artista"].includes(normalizeCategory(profile.categoria)));
+    }
+    return availableProfiles.filter((profile) => normalizeCategory(profile.categoria) === categoryKey);
+}
+
+function renderCategoryProfiles(categoryKey) {
+    if (!categoryDialogProfiles) return;
+    const profiles = profilesForCategory(categoryKey);
+    categoryDialogProfiles.replaceChildren();
+    if (!profiles.length) {
+        categoryDialogProfiles.textContent = "Nenhum perfil disponível nesta categoria ainda.";
+        return;
+    }
+    renderArtistCards(profiles, categoryDialogProfiles);
 }
 
 fetch(`${apiURL}/usuario/destaques`)
@@ -341,15 +371,16 @@ fetch(`${apiURL}/usuario/destaques`)
         return response.json();
     })
     .then((data) => {
+        availableProfiles = Array.isArray(data) ? data : [];
         artistsGrid.innerHTML = "";
 
-        if (!Array.isArray(data) || data.length === 0) {
+        if (!availableProfiles.length) {
             artistsGrid.innerHTML = '<p class="empty-artists">Ainda não há artistas cadastrados.</p>';
             return;
         }
 
-        renderArtistCards(data, artistsGrid);
-        if (featuredProfiles) renderArtistCards(data, featuredProfiles);
+        renderArtistCards(availableProfiles, artistsGrid);
+        if (featuredProfiles) renderArtistCards([...availableProfiles].sort((a, b) => Number(b.acessos || 0) - Number(a.acessos || 0)).slice(0, 3), featuredProfiles);
     })
     .catch((error) => {
         console.error("Erro ao carregar destaques:", error);
@@ -635,11 +666,13 @@ const categoryDialogDescription = document.getElementById("category-dialog-descr
 const categoryProfileTypes = document.getElementById("category-profile-types");
 const categoryDialogAction = document.querySelector(".category-dialog-action");
 const categoryDialogClose = document.querySelector(".category-dialog-close");
+const categoryDialogProfiles = document.getElementById("category-dialog-profiles");
+const categoryDialogBrowse = document.getElementById("category-dialog-browse");
 const profileCategories = {
     musica: {
         title: "Música",
         description: "Apresente sua identidade sonora, seus lançamentos e as colaborações que fazem parte da sua trajetória.",
-        types: ["Artista", "Beatmaker"],
+        types: ["Artista", "Beatmaker", "Produtor"],
     },
     audiovisual: {
         title: "Audiovisual",
@@ -684,6 +717,14 @@ document.querySelectorAll("[data-profile-category]").forEach((categoryButton) =>
 
         categoryDialogTitle.textContent = category.title;
         categoryDialogDescription.textContent = category.description;
+        renderCategoryProfiles(categoryButton.dataset.profileCategory);
+        categoryDialogBrowse.onclick = () => {
+            fecharCategoryDialog();
+            artistsGrid.innerHTML = "";
+            const profiles = profilesForCategory(categoryButton.dataset.profileCategory);
+            renderArtistCards(profiles, artistsGrid);
+            document.getElementById("artistas")?.scrollIntoView({ behavior: "smooth" });
+        };
         let selectedType = category.types[0];
         const updateAction = () => {
             categoryDialogAction.href = `/front-end/login/index.html?cadastro=1&categoria=${encodeURIComponent(category.title)}&tipo=${encodeURIComponent(selectedType)}`;

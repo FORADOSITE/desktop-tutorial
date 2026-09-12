@@ -6,13 +6,22 @@ const apiBase = window.location.protocol === "file:" || ["localhost", "127.0.0.1
     : "/api";
 const storedCategory = localStorage.getItem(categoryStorageKey) || "Música";
 const storedProfileType = localStorage.getItem("fora-do-site-profile-type") || "Artista";
-const profileCategory = storedCategory === "Música" ? storedProfileType : storedCategory;
+const profileCategory = ["Música", "Artista"].includes(storedCategory) ? storedProfileType : storedCategory;
 let profileState = loadState();
 let pendingAvatarUrl = null;
 
 function loadState() {
     try {
-        return JSON.parse(localStorage.getItem(storageKey)) || { tracks: [], socials: {}, projects: [] };
+        const savedState = JSON.parse(localStorage.getItem(storageKey)) || {};
+        return {
+            tracks: [],
+            socials: {},
+            projects: [],
+            ...savedState,
+            tracks: Array.isArray(savedState.tracks) ? savedState.tracks : [],
+            socials: savedState.socials && typeof savedState.socials === "object" ? savedState.socials : {},
+            projects: Array.isArray(savedState.projects) ? savedState.projects : [],
+        };
     } catch {
         return { tracks: [], socials: {}, projects: [] };
     }
@@ -40,6 +49,8 @@ async function syncFeaturedProfile() {
                 titulo: profileState.role,
                 bio: profileState.bio,
                 image_perfil: profileState.avatarUrl,
+                categoria: storedCategory,
+                tipo: storedProfileType,
                 ativo: true,
             }),
         });
@@ -75,7 +86,11 @@ async function saveAndViewProfile() {
 
     saveState();
     renderProfile();
-    syncFeaturedProfile();
+    const synced = await syncFeaturedProfile();
+    if (!synced) {
+        showStatus("Não foi possível publicar o perfil agora. Tente novamente.", true);
+        return;
+    }
     window.location.href = "/front-end/artista/index.html?me=1";
 }
 
@@ -127,17 +142,26 @@ function configurePortfolio() {
         return;
     }
 
-    if (key === "beatmaker") {
-        document.getElementById("portfolio-title").textContent = "Contato profissional";
-        note.textContent = "Informe apenas os canais para contratar ou falar com você. A plataforma não comercializa beats.";
-        form.innerHTML = `<label for="beatmaker-email">E-mail</label><input id="beatmaker-email" type="email" maxlength="160" placeholder="contato@exemplo.com" required><label for="beatmaker-phone">Celular</label><input id="beatmaker-phone" type="tel" maxlength="25" placeholder="(00) 00000-0000"><button class="primary-button" type="submit">Salvar contato</button>`;
-        setValue("beatmaker-email", profileState.beatmaker?.email || "");
-        setValue("beatmaker-phone", profileState.beatmaker?.phone || "");
+    if (["beatmaker", "produtor"].includes(key)) {
+        const producer = key === "produtor";
+        document.getElementById("portfolio-title").textContent = producer ? "Contato da gravadora / produtor" : "Contato profissional";
+        note.textContent = producer
+            ? "Informe o nome da gravadora ou do produtor e os canais profissionais para contato."
+            : "Informe apenas os canais para contratar ou falar com você. A plataforma não comercializa beats.";
+        form.innerHTML = `${producer ? '<label for="producer-name">Nome da gravadora / produtor</label><input id="producer-name" maxlength="120" placeholder="Ex.: Estúdio Aurora" required>' : ""}<label for="professional-email">E-mail</label><input id="professional-email" type="email" maxlength="160" placeholder="contato@exemplo.com" required><label for="professional-phone">Celular</label><input id="professional-phone" type="tel" maxlength="25" placeholder="(00) 00000-0000"><button class="primary-button" type="submit">Salvar contato</button>`;
+        if (producer) setValue("producer-name", profileState.producer?.name || "");
+        setValue("professional-email", profileState.producer?.email || profileState.beatmaker?.email || "");
+        setValue("professional-phone", profileState.producer?.phone || profileState.beatmaker?.phone || "");
         form.addEventListener("submit", (event) => {
             event.preventDefault();
-            profileState.beatmaker = { email: document.getElementById("beatmaker-email").value.trim(), phone: document.getElementById("beatmaker-phone").value.trim() };
+            const contact = {
+                email: document.getElementById("professional-email").value.trim(),
+                phone: document.getElementById("professional-phone").value.trim(),
+            };
+            if (producer) contact.name = document.getElementById("producer-name").value.trim();
+            profileState[producer ? "producer" : "beatmaker"] = contact;
             saveState();
-            showStatus("Contato do beatmaker salvo.");
+            showStatus(producer ? "Contato da gravadora / produtor salvo." : "Contato do beatmaker salvo.");
         });
         return;
     }
@@ -400,15 +424,15 @@ document.getElementById("view-profile-button").addEventListener("click", async (
     button.disabled = false;
 });
 
-document.getElementById("identity-form").addEventListener("submit", (event) => {
+document.getElementById("identity-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     profileState.name = document.getElementById("profile-name").value.trim();
     profileState.role = document.getElementById("profile-role").value.trim();
     profileState.bio = document.getElementById("profile-bio").value.trim();
     saveState();
     renderProfile();
-    syncFeaturedProfile();
-    showStatus("Identidade salva.");
+    const synced = await syncFeaturedProfile();
+    showStatus(synced ? "Identidade salva e publicada." : "Identidade salva localmente, mas não foi publicada.", !synced);
 });
 
 document.getElementById("social-form").addEventListener("submit", (event) => {

@@ -1432,9 +1432,12 @@ header,
     }
 
     .header-actions {
+        display: flex;
+        margin-left: auto;
+    }
 
+    .header-actions .search-box {
         display: none;
-
     }
 
     .mobile-menu-button {
@@ -1560,11 +1563,25 @@ header,
     }
 
 
-    .main-nav:not(.mobile-active),
-    .header-actions {
+    .main-nav:not(.mobile-active) {
 
         display: none;
 
+    }
+
+    .header-actions {
+        display: flex;
+        margin-left: auto;
+    }
+
+    .header-actions .search-box {
+        display: none;
+    }
+
+    .header-login {
+        height: 40px;
+        padding: 0 12px;
+        font-size: 10px;
     }
 
 
@@ -1896,6 +1913,28 @@ header,
     margin-bottom: 30px;
 }
 
+.category-dialog-profiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    max-height: 260px;
+    margin-bottom: 18px;
+    overflow-y: auto;
+}
+
+.category-dialog-profiles:empty {
+    display: none;
+}
+
+.category-dialog-profiles > .artist-card {
+    min-width: 0;
+    margin: 0;
+}
+
+.category-dialog-browse {
+    margin: 0 8px 0 0;
+}
+
 .category-profile-type {
     margin: 0;
     padding: 9px 11px;
@@ -1910,9 +1949,9 @@ header,
 }
 
 .category-profile-type.selected {
-    border-color: var(--lime);
+    border-color: var(--green);
     color: var(--black);
-    background: var(--lime);
+    background: var(--green);
 }
 
 .category-dialog-action {
@@ -1939,5 +1978,15 @@ header,
 
     .category-dialog-action {
         width: 100%;
+    }
+
+    .category-dialog-browse {
+        width: 100%;
+        margin: 0 0 10px;
+    }
+
+    .category-dialog-profiles {
+        grid-template-columns: 1fr;
+        max-height: 220px;
     }
 }
