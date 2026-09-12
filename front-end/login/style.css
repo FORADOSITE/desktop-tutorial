@@ -303,6 +303,15 @@ html[data-auth-mode="signup"] .auth-switch a[data-auth-tab="signup"]::after {
     box-shadow: 0 0 0 3px var(--auth-glow) !important;
 }
 
+#clerk-auth input[maxlength="1"] {
+    flex: 0 0 44px;
+    width: 44px !important;
+    min-width: 0;
+    padding: 0 !important;
+    text-align: center;
+    letter-spacing: 0 !important;
+}
+
 #clerk-auth .auth-button,
 #clerk-auth .auth-social-button {
     width: 100%;
@@ -451,5 +460,10 @@ html[data-auth-mode="signup"] .auth-switch a[data-auth-tab="signup"]::after {
 
     .auth-heading h2 {
         font-size: clamp(50px, 17vw, 58px);
+    }
+
+    #clerk-auth input[maxlength="1"] {
+        flex-basis: 36px;
+        width: 36px !important;
     }
 }

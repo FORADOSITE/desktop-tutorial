@@ -7,6 +7,7 @@ const rootDir = path.resolve(__dirname, "..");
 const envFile = path.join(__dirname, ".env");
 const profilesFile = path.join(__dirname, "data", "profiles.json");
 const verificationsFile = path.join(__dirname, "data", "verifications.json");
+const maxRequestBytes = 12 * 1024 * 1024;
 const mimeTypes = {
     ".css": "text/css; charset=utf-8",
     ".gif": "image/gif",
@@ -253,9 +254,9 @@ function readRequestBody(request, callback) {
     let total = 0;
     request.on("data", (chunk) => {
         total += chunk.length;
-        if (total <= 12 * 1024 * 1024) chunks.push(chunk);
+        if (total <= maxRequestBytes) chunks.push(chunk);
     });
-    request.on("end", () => callback(total <= 12 * 1024 * 1024 ? Buffer.concat(chunks) : null));
+    request.on("end", () => callback(total <= maxRequestBytes ? Buffer.concat(chunks) : null));
 }
 
 const server = http.createServer((request, response) => {
@@ -306,6 +307,11 @@ const server = http.createServer((request, response) => {
     }
 
     if (request.method === "POST" && requestUrl.pathname === "/api/usuario") {
+        if (Number(request.headers["content-length"] || 0) > maxRequestBytes) {
+            sendJson(response, 413, { success: false, error: "O envio excede o limite permitido de 12 MB." });
+            request.resume();
+            return;
+        }
         readRequestBody(request, (body) => {
             const fields = body && parseMultipart(request, body);
             const frente = fields?.documento_frente;
