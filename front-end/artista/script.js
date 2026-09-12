@@ -130,15 +130,19 @@ async function loadProfile() {
         return;
     }
     try {
-        const response = await fetch(`${apiBase}/usuario/destaques`);
+        const response = await fetch(`${apiBase}/usuario/${encodeURIComponent(slug || name)}`);
+        if (response.status === 404) {
+            document.getElementById("profile-status").textContent = "Perfil não encontrado.";
+            return;
+        }
         if (!response.ok) throw new Error("Falha ao carregar perfil");
         const profiles = await response.json();
-        const profile = profiles.find((item) => (slug && (item.slug === slug || createSlug(item.nome) === slug)) || (name && normalizeName(item.nome) === normalizeName(name)));
+        const profile = Array.isArray(profiles) ? profiles[0] : profiles;
         if (!profile) throw new Error("Perfil não encontrado");
         renderProfile(profile);
         registerProfileAccess(profile.slug || createSlug(profile.nome));
     } catch (error) {
-        console.error(error);
+        console.error("Falha ao carregar perfil público:", error);
         document.getElementById("profile-status").textContent = "Não foi possível carregar este perfil agora.";
     }
 }

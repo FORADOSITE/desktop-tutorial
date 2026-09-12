@@ -36,6 +36,7 @@ const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 const verificationsKey = "fora-do-site:verifications";
 const devicesKey = "fora-do-site:devices";
+const profilesKey = "fora-do-site:profiles";
 const port = Number(process.env.PORT || 3000);
 const allowedAccountEmails = new Set((process.env.ALLOWED_ACCOUNT_EMAILS || "").split(",").map((value) => value.trim().toLowerCase()).filter(Boolean));
 const blockAllAccounts = process.env.BLOCK_ALL_ACCOUNTS === "true";
@@ -99,7 +100,13 @@ function setSecurityHeaders(response) {
 }
 
 function serveFile(response, requestPath) {
-    const relativePath = requestPath === "/" ? "index.html" : requestPath.replace(/^\/+/, "");
+    let relativePath;
+    try {
+        relativePath = decodeURIComponent(requestPath === "/" ? "index.html" : requestPath.replace(/^\/+/, ""));
+    } catch {
+        sendJson(response, 400, { error: "Caminho inválido" });
+        return;
+    }
     let filePath = path.resolve(rootDir, relativePath);
     const rootPrefix = `${rootDir}${path.sep}`;
     const blockedPath = /(^|[\\/])(?:\.env(?:\.|$)|\.git(?:[\\/]|$)|\.vercel(?:[\\/]|$))/i.test(relativePath);
@@ -297,7 +304,17 @@ async function confirmDeviceAccess(userId, deviceId, code, block) {
     return { ok: true };
 }
 
-function loadFeaturedProfiles() {
+async function loadFeaturedProfiles() {
+    if (redisUrl && redisToken) {
+        const value = await redisCommand("GET", profilesKey);
+        try {
+            const profiles = JSON.parse(value || "[]");
+            return Array.isArray(profiles) ? profiles : [];
+        } catch {
+            return [];
+        }
+    }
+
     try {
         const profiles = JSON.parse(fs.readFileSync(profilesFile, "utf8"));
         return Array.isArray(profiles) ? profiles : [];
@@ -306,8 +323,8 @@ function loadFeaturedProfiles() {
     }
 }
 
-function saveFeaturedProfile(profile) {
-    const profiles = loadFeaturedProfiles();
+async function saveFeaturedProfile(profile) {
+    const profiles = await loadFeaturedProfiles();
     const normalizedName = normalizeName(profile.nome);
     const email = normalizeEmail(profile.email || "");
     const usuario = normalizeKey(profile.usuario || "");
@@ -339,17 +356,25 @@ function saveFeaturedProfile(profile) {
     };
     if (existingIndex === -1) profiles.push(savedProfile);
     else profiles[existingIndex] = savedProfile;
-    fs.mkdirSync(path.dirname(profilesFile), { recursive: true });
-    fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
+    if (redisUrl && redisToken) {
+        await redisCommand("SET", profilesKey, JSON.stringify(profiles));
+    } else {
+        fs.mkdirSync(path.dirname(profilesFile), { recursive: true });
+        fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
+    }
     return savedProfile;
 }
 
-function incrementFeaturedProfileAccess(slug) {
-    const profiles = loadFeaturedProfiles();
+async function incrementFeaturedProfileAccess(slug) {
+    const profiles = await loadFeaturedProfiles();
     const profile = profiles.find((item) => item.slug === slug);
     if (!profile) return null;
     profile.acessos = Number(profile.acessos || 0) + 1;
-    fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
+    if (redisUrl && redisToken) {
+        await redisCommand("SET", profilesKey, JSON.stringify(profiles));
+    } else {
+        fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
+    }
     return profile;
 }
 
@@ -434,7 +459,7 @@ function readRequestBody(request, callback) {
     request.on("end", () => callback(total <= maxRequestBytes ? Buffer.concat(chunks) : null));
 }
 
-const server = http.createServer((request, response) => {
+const server = http.createServer(async (request, response) => {
     const requestUrl = new URL(request.url, `http://${request.headers.host || "localhost"}`);
     const authorization = request.headers.authorization || "";
     const allowedOrigins = new Set([
@@ -495,9 +520,11 @@ const server = http.createServer((request, response) => {
                 return;
             }
             const isAllowed = isAllowedAccount(claims);
-            const profileWasSaved = loadFeaturedProfiles().some((profile) => profile.owner_id === userId);
+            const publishedProfile = (await loadFeaturedProfiles()).find((profile) => profile.owner_id === userId && profile.ativo !== false);
             sendJson(response, 200, {
-                verificado: Boolean((await loadVerifiedUsers()).has(userId) || profileWasSaved || isAllowed),
+                verificado: Boolean((await loadVerifiedUsers()).has(userId) || publishedProfile || isAllowed),
+                perfilPublicado: Boolean(publishedProfile),
+                perfilSlug: publishedProfile?.slug || null,
                 dispositivoPermitido: true,
             });
         });
@@ -599,7 +626,7 @@ const server = http.createServer((request, response) => {
 
     if (request.method === "POST" && requestUrl.pathname === "/api/usuario/destaques") {
         readRequestBody(request, (body) => {
-            getAuthenticatedUserInfo(authorization).then((claims) => {
+            getAuthenticatedUserInfo(authorization).then(async (claims) => {
                 if (!claims?.sub) {
                     sendJson(response, 401, { success: false, error: "Faça login para publicar o perfil." });
                     return;
@@ -610,7 +637,7 @@ const server = http.createServer((request, response) => {
                         sendJson(response, 400, { success: false, error: "Informe o nome do perfil." });
                         return;
                     }
-                    const savedProfile = saveFeaturedProfile({ ...profile, owner_id: claims.sub, ativo: true });
+                    const savedProfile = await saveFeaturedProfile({ ...profile, owner_id: claims.sub, ativo: true });
                     sendJson(response, 201, { success: true, profile: savedProfile });
                 } catch (error) {
                     const message = error?.message || "Dados de perfil inválidos.";
@@ -622,10 +649,10 @@ const server = http.createServer((request, response) => {
     }
 
     if (request.method === "POST" && requestUrl.pathname === "/api/usuario/destaques/acesso") {
-        readRequestBody(request, (body) => {
+        readRequestBody(request, async (body) => {
             try {
                 const { slug } = body ? JSON.parse(body.toString("utf8")) : {};
-                if (!slug || !incrementFeaturedProfileAccess(String(slug))) {
+                if (!slug || !(await incrementFeaturedProfileAccess(String(slug)))) {
                     sendJson(response, 404, { success: false, error: "Perfil não encontrado." });
                     return;
                 }
@@ -651,14 +678,16 @@ const server = http.createServer((request, response) => {
     }
 
     if (requestUrl.pathname === "/api/usuario/destaques") {
-        sendJson(response, 200, loadFeaturedProfiles().filter((profile) => profile.ativo !== false).map(publicFeaturedProfile));
+        sendJson(response, 200, (await loadFeaturedProfiles()).filter((profile) => profile.ativo !== false).map(publicFeaturedProfile));
         return;
     }
 
     const publicProfileMatch = requestUrl.pathname.match(/^\/api\/usuario\/([^/]+)$/);
     if (publicProfileMatch) {
         const name = decodeURIComponent(publicProfileMatch[1]);
-        const profile = loadFeaturedProfiles().find((item) => normalizeName(item.nome) === normalizeName(name) && item.ativo !== false);
+        const profile = (await loadFeaturedProfiles()).find((item) => (
+            item.slug === name || normalizeName(item.nome) === normalizeName(name)
+        ) && item.ativo !== false);
         if (!profile) {
             sendJson(response, 404, { error: "Usuário não encontrado" });
             return;

@@ -170,7 +170,7 @@ async function iniciarClerk() {
             return;
         }
         const verificado = status.verificado === true;
-        const hasProfile = hasSavedProfile() || await hasPublishedProfile();
+        const hasProfile = status.perfilPublicado === true || hasSavedProfile() || await hasPublishedProfile();
         window.location.href = verificado
             ? (hasProfile ? "/front-end/artista/index.html?me=1" : "/front-end/escolha-perfil/index.html")
             : "/front-end/verificacao-documento/index.html";
