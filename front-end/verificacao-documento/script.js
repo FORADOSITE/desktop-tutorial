@@ -66,7 +66,12 @@ function mostrarStatus(message, error = false) {
 }
 
 function arquivoValido(arquivo) {
-    return arquivo && ["image/jpeg", "image/png", "image/webp"].includes(arquivo.type) && arquivo.size <= 5 * 1024 * 1024;
+    if (!arquivo || arquivo.size <= 0 || arquivo.size > 5 * 1024 * 1024) return false;
+    const mime = String(arquivo.type || "").toLowerCase();
+    const extensao = (arquivo.name || "").split(".").pop()?.toLowerCase();
+    const tiposAceitos = new Set(["image/jpeg", "image/png", "image/webp"]);
+    const extensoesAceitas = new Set(["jpg", "jpeg", "png", "webp"]);
+    return (tiposAceitos.has(mime) || (extensao && extensoesAceitas.has(extensao))) && arquivo.size <= 5 * 1024 * 1024;
 }
 
 function prepararDocumento(arquivo) {

@@ -418,10 +418,20 @@ function normalizeName(value) {
 }
 
 function hasValidImageSignature(file) {
-    if (!file || !acceptedDocumentTypes.has(file.contentType) || file.data.length > 5 * 1024 * 1024) return false;
-    if (file.contentType === "image/jpeg") return file.data[0] === 0xff && file.data[1] === 0xd8 && file.data[2] === 0xff;
-    if (file.contentType === "image/png") return file.data.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
-    return file.data.toString("ascii", 0, 4) === "RIFF" && file.data.toString("ascii", 8, 12) === "WEBP";
+    if (!file || !file.data || file.data.length === 0 || file.data.length > 5 * 1024 * 1024) return false;
+    const contentType = String(file.contentType || "").toLowerCase();
+    const hasAcceptedMime = contentType ? acceptedDocumentTypes.has(contentType) : false;
+    const hasMagicBytes =
+        (contentType === "image/jpeg" || (!contentType && file.data[0] === 0xff && file.data[1] === 0xd8 && file.data[2] === 0xff))
+            ? file.data[0] === 0xff && file.data[1] === 0xd8 && file.data[2] === 0xff
+            : false;
+    if (contentType === "image/png" || (!contentType && file.data.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])))) {
+        return file.data.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    }
+    if (contentType === "image/webp" || (!contentType && file.data.toString("ascii", 0, 4) === "RIFF" && file.data.toString("ascii", 8, 12) === "WEBP")) {
+        return file.data.toString("ascii", 0, 4) === "RIFF" && file.data.toString("ascii", 8, 12) === "WEBP";
+    }
+    return hasAcceptedMime && hasMagicBytes;
 }
 
 function parseMultipart(request, body) {
@@ -436,13 +446,16 @@ function parseMultipart(request, body) {
         if (next === -1) break;
         const part = body.subarray(start, next);
         const headerEnd = part.indexOf(Buffer.from("\r\n\r\n"));
-        if (headerEnd !== -1) {
-            const headers = part.subarray(0, headerEnd).toString("utf8");
-            const name = headers.match(/name="([^"]+)"/i)?.[1];
-            const fileName = headers.match(/filename="([^"]*)"/i)?.[1];
-            const contentType = headers.match(/Content-Type:\s*([^\r\n]+)/i)?.[1]?.trim();
-            const data = part.subarray(headerEnd + 4, part.length - 2);
-            if (name) parts[name] = fileName ? { contentType, data } : data.toString("utf8");
+        const altHeaderEnd = headerEnd === -1 ? part.indexOf(Buffer.from("\n\n")) : -1;
+        const effectiveHeaderEnd = headerEnd !== -1 ? headerEnd : altHeaderEnd;
+        if (effectiveHeaderEnd !== -1) {
+            const headers = part.subarray(0, effectiveHeaderEnd).toString("utf8");
+            const name = headers.match(/name="([^"]+)"/i)?.[1] || headers.match(/name=([^;\r\n]+)/i)?.[1]?.replace(/^"|"$/g, "");
+            const fileName = headers.match(/filename="([^"]*)"/i)?.[1] || headers.match(/filename=([^;\r\n]+)/i)?.[1]?.replace(/^"|"$/g, "");
+            const contentType = headers.match(/Content-Type:\s*([^\r\n]+)/i)?.[1]?.trim() || headers.match(/content-type:\s*([^\r\n]+)/i)?.[1]?.trim();
+            const separatorLength = headerEnd !== -1 ? 4 : 2;
+            const data = part.subarray(effectiveHeaderEnd + separatorLength, part.length - 2);
+            if (name) parts[name] = fileName ? { contentType, data } : data.toString("utf8").replace(/\r?\n$/, "");
         }
         cursor = next;
     }
@@ -591,7 +604,8 @@ const server = http.createServer(async (request, response) => {
                     });
                     return;
                 }
-                if (!fields?.nome || fields.aceite_documentos !== "on") {
+                const aceite = String(fields?.aceite_documentos || "").trim().toLowerCase();
+                if (!fields?.nome || (aceite !== "on" && aceite !== "true" && aceite !== "1")) {
                     sendJson(response, 400, { success: false, error: "Informe seu nome e autorize o uso dos documentos." });
                     return;
                 }
