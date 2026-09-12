@@ -11,6 +11,22 @@ const isLocalDevelopment = ["localhost", "127.0.0.1", "::1"].includes(window.loc
 const apiBase = window.location.protocol === "file:" || isLocalDevelopment
     ? "http://localhost:3000/api"
     : "/api";
+const deviceStorageKey = "fora-do-site-device-id";
+
+function getDeviceId() {
+    try {
+        let deviceId = localStorage.getItem(deviceStorageKey);
+        if (!deviceId) {
+            deviceId = crypto.randomUUID();
+            localStorage.setItem(deviceStorageKey, deviceId);
+        }
+        return deviceId;
+    } catch {
+        return "";
+    }
+}
+
+const deviceId = getDeviceId();
 
 const clerkAppearance = {
     variables: {
@@ -122,11 +138,9 @@ async function hasPublishedProfile() {
 async function verificarDocumentacao() {
     const token = await window.Clerk.session.getToken();
     const response = await fetch(`${apiBase}/usuario/status`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, "X-Device-Id": deviceId },
     });
-    if (!response.ok) return false;
-    const status = await response.json();
-    return status.verificado === true;
+    return response.json().catch(() => ({}));
 }
 
 async function iniciarClerk() {
@@ -150,7 +164,12 @@ async function iniciarClerk() {
     });
 
     if (window.Clerk.user) {
-        const verificado = await verificarDocumentacao();
+        const status = await verificarDocumentacao();
+        if (status.dispositivoPermitido === false) {
+            window.location.href = `/front-end/seguranca-dispositivo/index.html?email=${encodeURIComponent(status.email || "seu e-mail cadastrado")}`;
+            return;
+        }
+        const verificado = status.verificado === true;
         const hasProfile = hasSavedProfile() || await hasPublishedProfile();
         window.location.href = verificado
             ? (hasProfile ? "/front-end/artista/index.html?me=1" : "/front-end/escolha-perfil/index.html")

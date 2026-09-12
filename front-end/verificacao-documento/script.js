@@ -9,6 +9,13 @@ const nomeElement = document.getElementById("nome");
 const nomeContaElement = document.getElementById("nome-conta");
 const draftStorageKey = "fora-do-site-verification-draft";
 const editMode = new URLSearchParams(window.location.search).get("modo") === "editar";
+const deviceId = (() => {
+    try {
+        return localStorage.getItem("fora-do-site-device-id") || "";
+    } catch {
+        return "";
+    }
+})();
 
 function carregarRascunho() {
     try {
@@ -62,6 +69,41 @@ function arquivoValido(arquivo) {
     return arquivo && ["image/jpeg", "image/png", "image/webp"].includes(arquivo.type) && arquivo.size <= 5 * 1024 * 1024;
 }
 
+function prepararDocumento(arquivo) {
+    const limitePixels = 1800;
+    const qualidade = 0.78;
+
+    return new Promise((resolve, reject) => {
+        const imagem = new Image();
+        const url = URL.createObjectURL(arquivo);
+        imagem.onload = () => {
+            URL.revokeObjectURL(url);
+            const escala = Math.min(1, limitePixels / Math.max(imagem.naturalWidth, imagem.naturalHeight));
+            const largura = Math.max(1, Math.round(imagem.naturalWidth * escala));
+            const altura = Math.max(1, Math.round(imagem.naturalHeight * escala));
+            const canvas = document.createElement("canvas");
+            canvas.width = largura;
+            canvas.height = altura;
+            const contexto = canvas.getContext("2d");
+            contexto.fillStyle = "#fff";
+            contexto.fillRect(0, 0, largura, altura);
+            contexto.drawImage(imagem, 0, 0, largura, altura);
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    reject(new Error("Não foi possível preparar a imagem do documento."));
+                    return;
+                }
+                resolve(new File([blob], `${arquivo.name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" }));
+            }, "image/jpeg", qualidade);
+        };
+        imagem.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("Não foi possível ler uma das imagens do documento."));
+        };
+        imagem.src = url;
+    });
+}
+
 function nomeDaConta(user) {
     return [user.firstName, user.lastName].filter(Boolean).join(" ");
 }
@@ -111,8 +153,15 @@ async function iniciar() {
     }
 
     const token = await window.Clerk.session.getToken();
-    const response = await fetch(`${apiBase}/usuario/status`, { headers: { Authorization: `Bearer ${token}` } });
-    if (response.ok && (await response.json()).verificado && !editMode) window.location.href = "/front-end/perfil/index.html";
+    const response = await fetch(`${apiBase}/usuario/status`, {
+        headers: { Authorization: `Bearer ${token}`, "X-Device-Id": deviceId },
+    });
+    const status = await response.json().catch(() => ({}));
+    if (status.dispositivoPermitido === false) {
+        window.location.href = `/front-end/seguranca-dispositivo/index.html?email=${encodeURIComponent(status.email || "seu e-mail cadastrado")}`;
+        return;
+    }
+    if (status.verificado && !editMode) window.location.href = "/front-end/perfil/index.html";
 }
 
 form.addEventListener("submit", async (event) => {
@@ -139,13 +188,21 @@ form.addEventListener("submit", async (event) => {
     }
 
     button.disabled = true;
-    mostrarStatus("Enviando documentos...");
+    mostrarStatus("Otimizando documentos...");
     try {
         const token = await window.Clerk.session.getToken();
+        const dados = new FormData(form);
+        const [frenteOtimizada, versoOtimizado] = await Promise.all([
+            prepararDocumento(frente),
+            prepararDocumento(verso),
+        ]);
+        dados.set("documento_frente", frenteOtimizada, frenteOtimizada.name);
+        dados.set("documento_verso", versoOtimizado, versoOtimizado.name);
+        mostrarStatus("Enviando documentos...");
         const response = await fetchComTimeout(`${apiBase}/usuario`, {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: new FormData(form),
+            headers: { Authorization: `Bearer ${token}`, "X-Device-Id": deviceId },
+            body: dados,
         });
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error || "Não foi possível concluir a verificação.");
