@@ -1,7 +1,8 @@
 const defaultAvatar = "/front-end/intro/img/fds.png";
 const storageKey = "fora-do-site-profile";
-const apiBase = window.location.protocol === "file:" || ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname) && window.location.port !== "3000"
-    ? "http://localhost:3000/api"
+const isLocalFrontend = window.location.protocol === "file:" || window.location.port === "5500";
+const apiBase = isLocalFrontend
+    ? `${window.location.protocol === "file:" ? "http:" : window.location.protocol}//${window.location.hostname || "localhost"}:3000/api`
     : "/api";
 const params = new URLSearchParams(window.location.search);
 const isOwner = params.get("me") === "1";

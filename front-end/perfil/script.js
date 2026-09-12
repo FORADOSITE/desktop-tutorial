@@ -1,8 +1,9 @@
 const defaultAvatar = "/front-end/intro/img/fds.png";
 const storageKey = "fora-do-site-profile";
 const categoryStorageKey = "fora-do-site-category";
-const apiBase = window.location.protocol === "file:" || ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname) && window.location.port !== "3000"
-    ? "http://localhost:3000/api"
+const isLocalFrontend = window.location.protocol === "file:" || window.location.port === "5500";
+const apiBase = isLocalFrontend
+    ? `${window.location.protocol === "file:" ? "http:" : window.location.protocol}//${window.location.hostname || "localhost"}:3000/api`
     : "/api";
 const storedCategory = localStorage.getItem(categoryStorageKey) || "Música";
 const storedProfileType = localStorage.getItem("fora-do-site-profile-type") || "Artista";
@@ -88,8 +89,9 @@ async function saveAndViewProfile() {
     renderProfile();
     const synced = await syncFeaturedProfile();
     if (!synced) {
-        showStatus("Não foi possível publicar o perfil agora. Tente novamente.", true);
-        return;
+        showStatus("Perfil salvo neste dispositivo. A publicação será tentada novamente.", true);
+    } else {
+        showStatus("Perfil salvo e publicado.");
     }
     window.location.href = "/front-end/artista/index.html?me=1";
 }

@@ -100,6 +100,14 @@ function observarProvedores() {
     new MutationObserver(ocultarElementosClerk).observe(authContainer, { childList: true, subtree: true });
 }
 
+function hasSavedProfile() {
+    try {
+        return Boolean(JSON.parse(localStorage.getItem("fora-do-site-profile"))?.name);
+    } catch {
+        return false;
+    }
+}
+
 async function verificarDocumentacao() {
     const token = await window.Clerk.session.getToken();
     const response = await fetch(`${apiBase}/usuario/status`, {
@@ -133,7 +141,7 @@ async function iniciarClerk() {
     if (window.Clerk.user) {
         const verificado = await verificarDocumentacao();
         window.location.href = verificado
-            ? "/front-end/escolha-perfil/index.html"
+            ? (hasSavedProfile() ? "/front-end/artista/index.html?me=1" : "/front-end/escolha-perfil/index.html")
             : "/front-end/verificacao-documento/index.html";
         return;
     }

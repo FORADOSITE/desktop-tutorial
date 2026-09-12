@@ -152,7 +152,7 @@ body::before {
     .profile-header, .profile-layout { width: min(calc(100% - 36px), 1240px); }
     .profile-header { min-height: 70px; padding: 12px 0; }
     .profile-brand { width: 140px; }
-    .header-actions { width: 100%; margin-left: 0; gap: 6px; }
+    .header-actions { flex: 1 1 0; min-width: 0; width: auto; margin-left: 0; gap: 6px; }
     .home-button, .view-profile-button { flex: 1; margin: 0; padding: 9px 10px; font-size: 8px; text-align: center; white-space: nowrap; }
     .header-status { display: none; }
     .profile-layout { padding-top: 42px; }
@@ -161,7 +161,9 @@ body::before {
 }
 
 @media (max-width: 420px) {
+    .profile-header { flex-wrap: wrap; }
     .profile-brand { width: 110px; }
+    .header-actions { flex: 0 0 100%; width: 100%; margin-top: 10px; }
     .header-status {
         max-width: 86px;
         text-align: right;

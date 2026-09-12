@@ -192,7 +192,8 @@ const server = http.createServer((request, response) => {
         ...(process.env.ALLOWED_ORIGINS || "").split(",").map((value) => value.trim()).filter(Boolean),
     ]);
     const origin = request.headers.origin;
-    if (origin && (allowedOrigins.has(origin) || origin === "null")) response.allowedOrigin = origin;
+    const localNetworkOrigin = /^https?:\/\/(?:localhost|127\.0\.0\.1|\d{1,3}(?:\.\d{1,3}){3}):5500$/.test(origin || "");
+    if (origin && (allowedOrigins.has(origin) || localNetworkOrigin || origin === "null")) response.allowedOrigin = origin;
     if (request.method === "OPTIONS") {
         setSecurityHeaders(response);
         if (response.allowedOrigin) response.setHeader("Access-Control-Allow-Origin", response.allowedOrigin);
@@ -311,7 +312,7 @@ const server = http.createServer((request, response) => {
 });
 
 if (require.main === module) {
-    server.listen(port, process.env.HOST || "127.0.0.1", () => {
+    server.listen(port, process.env.HOST || "0.0.0.0", () => {
         console.log(`Servidor local em http://localhost:${port}`);
     });
 }
