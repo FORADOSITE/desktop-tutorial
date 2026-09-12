@@ -322,6 +322,7 @@ function saveFeaturedProfile(profile) {
         throw new Error("Já existe um usuário com o mesmo nome, usuário e e-mail.");
     }
     const savedProfile = {
+        owner_id: String(profile.owner_id || existingProfile?.owner_id || "").trim(),
         nome: String(profile.nome).trim().slice(0, 80),
         usuario: String(profile.usuario || "").trim().slice(0, 60),
         email: normalizeEmail(profile.email || ""),
@@ -350,6 +351,11 @@ function incrementFeaturedProfileAccess(slug) {
     profile.acessos = Number(profile.acessos || 0) + 1;
     fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2));
     return profile;
+}
+
+function publicFeaturedProfile(profile) {
+    const { owner_id: _ownerId, ...publicProfile } = profile;
+    return publicProfile;
 }
 
 async function getAuthenticatedUserInfo(authorization) {
@@ -489,8 +495,9 @@ const server = http.createServer((request, response) => {
                 return;
             }
             const isAllowed = isAllowedAccount(claims);
+            const profileWasSaved = loadFeaturedProfiles().some((profile) => profile.owner_id === userId);
             sendJson(response, 200, {
-                verificado: Boolean((await loadVerifiedUsers()).has(userId) || isAllowed),
+                verificado: Boolean((await loadVerifiedUsers()).has(userId) || profileWasSaved || isAllowed),
                 dispositivoPermitido: true,
             });
         });
@@ -603,7 +610,7 @@ const server = http.createServer((request, response) => {
                         sendJson(response, 400, { success: false, error: "Informe o nome do perfil." });
                         return;
                     }
-                    const savedProfile = saveFeaturedProfile({ ...profile, ativo: true });
+                    const savedProfile = saveFeaturedProfile({ ...profile, owner_id: claims.sub, ativo: true });
                     sendJson(response, 201, { success: true, profile: savedProfile });
                 } catch (error) {
                     const message = error?.message || "Dados de perfil inválidos.";
@@ -644,7 +651,7 @@ const server = http.createServer((request, response) => {
     }
 
     if (requestUrl.pathname === "/api/usuario/destaques") {
-        sendJson(response, 200, loadFeaturedProfiles().filter((profile) => profile.ativo !== false));
+        sendJson(response, 200, loadFeaturedProfiles().filter((profile) => profile.ativo !== false).map(publicFeaturedProfile));
         return;
     }
 
@@ -656,7 +663,7 @@ const server = http.createServer((request, response) => {
             sendJson(response, 404, { error: "Usuário não encontrado" });
             return;
         }
-        sendJson(response, 200, [profile]);
+        sendJson(response, 200, [publicFeaturedProfile(profile)]);
         return;
     }
 

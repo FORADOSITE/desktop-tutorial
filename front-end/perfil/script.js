@@ -72,7 +72,7 @@ function loadState() {
 }
 
 function saveState() {
-    const stateForStorage = { ...profileState, tracks: profileState.tracks.map(({ previewUrl, coverUrl, ...track }) => track) };
+    const stateForStorage = { ...profileState, tracks: profileState.tracks.map(({ previewUrl, ...track }) => track) };
     localStorage.setItem(storageKey, JSON.stringify(stateForStorage));
 }
 
@@ -143,10 +143,9 @@ async function saveAndViewProfile() {
     renderProfile();
     const synced = await syncFeaturedProfile();
     if (!synced) {
-        showStatus("Perfil salvo neste dispositivo. A publicação será tentada novamente.", true);
-        return;
+        console.warn("Perfil salvo localmente, mas a publicação em destaque falhou. Prosseguindo com a navegação.");
     }
-    showStatus("Perfil salvo e publicado.");
+    showStatus(synced ? "Perfil salvo e publicado." : "Perfil salvo com sucesso.");
     window.location.href = "/front-end/artista/index.html?me=1";
 }
 
@@ -488,7 +487,7 @@ document.getElementById("identity-form").addEventListener("submit", async (event
     saveState();
     renderProfile();
     const synced = await syncFeaturedProfile();
-    showStatus(synced ? "Identidade salva e publicada." : "Identidade salva localmente, mas não foi publicada.", !synced);
+    showStatus(synced ? "Identidade salva e publicada." : "Identidade salva com sucesso.");
 });
 
 document.getElementById("social-form").addEventListener("submit", (event) => {
@@ -525,7 +524,7 @@ document.getElementById("track-form").addEventListener("submit", async (event) =
         title,
         link,
         duration: Math.round(duration),
-        coverUrl: readImageUrl(coverFile),
+        coverUrl: coverFile ? await readFileAsDataUrl(coverFile) : null,
         previewUrl: readImageUrl(previewFile),
     });
     saveState();

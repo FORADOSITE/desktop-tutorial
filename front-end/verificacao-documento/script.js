@@ -207,7 +207,7 @@ form.addEventListener("submit", async (event) => {
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error || "Não foi possível concluir a verificação.");
         sessionStorage.removeItem(draftStorageKey);
-        window.location.href = "/front-end/escolha-perfil/index.html";
+        window.location.href = "/front-end/perfil/index.html";
     } catch (error) {
         mostrarStatus(error.message, true);
         button.disabled = false;
