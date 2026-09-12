@@ -63,7 +63,7 @@ function arquivoValido(arquivo) {
 }
 
 function nomeDaConta(user) {
-    return user.username || [user.firstName, user.lastName].filter(Boolean).join(" ") || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "";
+    return [user.firstName, user.lastName].filter(Boolean).join(" ");
 }
 
 async function carregarClerk() {
@@ -97,7 +97,7 @@ async function iniciar() {
 
     const nome = nomeDaConta(window.Clerk.user);
     if (!nome) {
-        mostrarStatus("Não foi possível identificar o nome da conta. Volte ao cadastro.", true);
+        mostrarStatus("Cadastre seu nome e sobrenome antes de enviar o RG.", true);
         return;
     }
     nomeElement.value = nome;
@@ -122,7 +122,7 @@ form.addEventListener("submit", async (event) => {
     const verso = document.getElementById("documento-verso").files[0];
 
     if (!nomeElement.value || nomeElement.value !== nomeContaElement.value) {
-        mostrarStatus("O nome precisa ser o mesmo usado no cadastro.", true);
+        mostrarStatus("O nome e sobrenome precisam ser os mesmos do cadastro e do RG.", true);
         return;
     }
 

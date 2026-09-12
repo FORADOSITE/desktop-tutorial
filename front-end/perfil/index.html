@@ -32,6 +32,11 @@
 
             <p id="status" class="status" role="status" aria-live="polite"></p>
 
+            <nav class="profile-tabs" aria-label="Seções do perfil">
+                <button class="profile-tab active" type="button" data-profile-tab="profile">Perfil</button>
+                <button class="profile-tab" type="button" data-profile-tab="settings">Configurações</button>
+            </nav>
+
             <section class="editor-section">
                 <div class="section-heading">
                     <span>01</span>
@@ -148,6 +153,39 @@
                     <button class="primary-button" type="submit">Adicionar projeto</button>
                 </form>
                 <div id="project-list" class="project-list" aria-live="polite"></div>
+            </section>
+
+            <section class="editor-section account-settings" id="account-settings" hidden>
+                <div class="section-heading">
+                    <span>06</span>
+                    <div><span class="eyebrow">CONTA</span><h2>Configurações</h2></div>
+                </div>
+                <p class="section-note">Atualize o e-mail de acesso ou defina uma nova senha para sua conta.</p>
+
+                <form id="email-form" class="form-grid account-form">
+                    <label for="current-email">E-mail atual</label>
+                    <input id="current-email" type="email" readonly>
+                    <label for="new-email">Novo e-mail</label>
+                    <input id="new-email" type="email" autocomplete="email" required>
+                    <button class="primary-button" type="submit">Enviar código para o novo e-mail</button>
+                </form>
+
+                <form id="email-verification-form" class="form-grid account-form" hidden>
+                    <label for="email-verification-code">Código enviado para o novo e-mail</label>
+                    <input id="email-verification-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+                    <button class="primary-button" type="submit">Confirmar novo e-mail</button>
+                </form>
+
+                <form id="password-form" class="form-grid account-form">
+                    <label for="current-password">Senha atual</label>
+                    <input id="current-password" type="password" autocomplete="current-password" required>
+                    <label for="new-password">Nova senha</label>
+                    <input id="new-password" type="password" minlength="8" autocomplete="new-password" required>
+                    <label for="confirm-password">Confirmar nova senha</label>
+                    <input id="confirm-password" type="password" minlength="8" autocomplete="new-password" required>
+                    <button class="primary-button" type="submit">Alterar senha</button>
+                </form>
+                <p id="account-status" class="status" role="status" aria-live="polite"></p>
             </section>
         </section>
 

@@ -10,6 +10,49 @@ const storedProfileType = localStorage.getItem("fora-do-site-profile-type") || "
 const profileCategory = ["Música", "Artista"].includes(storedCategory) ? storedProfileType : storedCategory;
 let profileState = loadState();
 let pendingAvatarUrl = null;
+let clerkUser = null;
+let pendingEmailAddress = null;
+
+function carregarScript(src, attributes = {}) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.crossOrigin = "anonymous";
+        script.src = src;
+        Object.entries(attributes).forEach(([name, value]) => script.setAttribute(name, value));
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+async function carregarClerk() {
+    if (window.Clerk?.user) {
+        clerkUser = window.Clerk.user;
+        return clerkUser;
+    }
+    const config = await fetch(`${apiBase}/config`).then((response) => response.json());
+    if (!config.clerkPublishableKey) throw new Error("A autenticação ainda não está configurada.");
+    const clerkDomain = atob(config.clerkPublishableKey.split("_")[2]).slice(0, -1);
+    await carregarScript(`https://${clerkDomain}/npm/@clerk/ui@1/dist/ui.browser.js`);
+    await carregarScript(`https://${clerkDomain}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, {
+        "data-clerk-publishable-key": config.clerkPublishableKey,
+    });
+    await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
+    clerkUser = window.Clerk.user;
+    if (!clerkUser) throw new Error("Sua sessão expirou. Entre novamente para editar a conta.");
+    return clerkUser;
+}
+
+function mostrarStatusConta(message, error = false) {
+    const status = document.getElementById("account-status");
+    status.textContent = message;
+    status.classList.toggle("error", error);
+}
+
+async function prepararConfiguracoes() {
+    const user = await carregarClerk();
+    document.getElementById("current-email").value = user.primaryEmailAddress?.emailAddress || "";
+}
 
 function loadState() {
     try {
@@ -541,6 +584,103 @@ document.getElementById("project-form").addEventListener("submit", async (event)
     updateProjectFields();
     button.disabled = false;
     showStatus("Projeto adicionado ao seu perfil.");
+});
+
+const profileTabs = [...document.querySelectorAll("[data-profile-tab]")];
+const profileSections = [...document.querySelectorAll(".editor-section:not(#account-settings)")];
+const accountSettings = document.getElementById("account-settings");
+
+profileTabs.forEach((tab) => tab.addEventListener("click", async () => {
+    const settingsSelected = tab.dataset.profileTab === "settings";
+    profileTabs.forEach((item) => item.classList.toggle("active", item === tab));
+    profileTabs.forEach((item) => item.setAttribute("aria-selected", String(item === tab)));
+    profileSections.forEach((section) => {
+        if (settingsSelected) {
+            section.dataset.hiddenBeforeSettings = String(section.hidden);
+            section.hidden = true;
+        } else {
+            section.hidden = section.dataset.hiddenBeforeSettings === "true";
+        }
+    });
+    accountSettings.hidden = !settingsSelected;
+    if (settingsSelected && !clerkUser) {
+        try {
+            await prepararConfiguracoes();
+        } catch (error) {
+            mostrarStatusConta(error.message, true);
+        }
+    }
+}));
+
+document.getElementById("email-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.submitter;
+    const newEmail = document.getElementById("new-email").value.trim();
+    button.disabled = true;
+    mostrarStatusConta("Enviando código de confirmação...");
+    try {
+        const user = await prepararConfiguracoes();
+        if (newEmail.toLowerCase() === user.primaryEmailAddress?.emailAddress?.toLowerCase()) {
+            throw new Error("Informe um e-mail diferente do atual.");
+        }
+        pendingEmailAddress = await user.createEmailAddress({ email: newEmail });
+        await pendingEmailAddress.prepareVerification({ strategy: "email_code" });
+        document.getElementById("email-verification-form").hidden = false;
+        mostrarStatusConta("Código enviado. Confira o novo e-mail para confirmar a troca.");
+    } catch (error) {
+        mostrarStatusConta(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
+});
+
+document.getElementById("email-verification-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.submitter;
+    const code = document.getElementById("email-verification-code").value.trim();
+    if (!pendingEmailAddress) {
+        mostrarStatusConta("Solicite um novo código antes de confirmar.", true);
+        return;
+    }
+    button.disabled = true;
+    mostrarStatusConta("Confirmando novo e-mail...");
+    try {
+        await pendingEmailAddress.attemptVerification({ code });
+        await clerkUser.update({ primaryEmailAddressId: pendingEmailAddress.id });
+        document.getElementById("current-email").value = pendingEmailAddress.emailAddress;
+        document.getElementById("email-verification-form").hidden = true;
+        document.getElementById("email-verification-code").value = "";
+        pendingEmailAddress = null;
+        mostrarStatusConta("E-mail alterado com sucesso.");
+    } catch (error) {
+        mostrarStatusConta(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
+});
+
+document.getElementById("password-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.submitter;
+    const currentPassword = document.getElementById("current-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+    if (newPassword !== confirmPassword) {
+        mostrarStatusConta("A confirmação da nova senha não confere.", true);
+        return;
+    }
+    button.disabled = true;
+    mostrarStatusConta("Alterando senha...");
+    try {
+        const user = await prepararConfiguracoes();
+        await user.updatePassword({ currentPassword, newPassword });
+        event.target.reset();
+        mostrarStatusConta("Senha alterada com sucesso.");
+    } catch (error) {
+        mostrarStatusConta(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
 });
 
 renderProfile();

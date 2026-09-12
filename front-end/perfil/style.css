@@ -69,6 +69,15 @@ body::before {
 .status { min-height: 20px; margin: 18px 0 0; color: var(--profile-green); font-size: 12px; }
 .status.error { color: #ff6868; }
 
+.profile-tabs { display: flex; gap: 24px; margin-top: 24px; border-bottom: 1px solid var(--profile-line); }
+.profile-tab { position: relative; padding: 0 0 13px; border: 0; color: var(--profile-muted); background: transparent; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; }
+.profile-tab::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; content: ""; background: transparent; }
+.profile-tab:hover, .profile-tab.active { color: var(--profile-green); }
+.profile-tab.active::after { background: var(--profile-green); }
+.account-form { padding: 22px 0; border-bottom: 1px solid var(--profile-line); }
+.account-form input[readonly] { color: var(--profile-muted); }
+.account-form[hidden] { display: none; }
+
 .editor-section { padding: 40px 0; border-bottom: 1px solid var(--profile-line); }
 .section-heading { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 28px; }
 .section-heading > span { flex: 0 0 30px; color: var(--profile-green); font-family: "Barlow Condensed", sans-serif; font-size: 30px; line-height: 1; }

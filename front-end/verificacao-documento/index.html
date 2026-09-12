@@ -19,8 +19,8 @@
             <p class="intro">Para criar seu perfil, envie fotos legíveis da frente e do verso do seu RG. A frente será usada para conferir sua data de nascimento.</p>
 
             <form id="verification-form" method="post" enctype="multipart/form-data">
-                <label for="nome">Nome de usuário</label>
-                <input id="nome" name="nome" maxlength="80" required autocomplete="nickname" placeholder="Como você quer aparecer no site">
+                <label for="nome">Nome e sobrenome conforme o RG</label>
+                <input id="nome" name="nome" maxlength="80" required autocomplete="name" readonly>
                 <input id="nome-conta" name="nome_conta" type="hidden">
 
                 <label for="data-nascimento">Data de nascimento conforme o RG</label>
