@@ -108,6 +108,17 @@ function hasSavedProfile() {
     }
 }
 
+async function hasPublishedProfile() {
+    const nome = window.Clerk.user && (window.Clerk.user.username || [window.Clerk.user.firstName, window.Clerk.user.lastName].filter(Boolean).join(" "));
+    if (!nome) return false;
+    try {
+        const response = await fetch(`${apiBase}/usuario/${encodeURIComponent(nome)}`);
+        return response.ok;
+    } catch {
+        return false;
+    }
+}
+
 async function verificarDocumentacao() {
     const token = await window.Clerk.session.getToken();
     const response = await fetch(`${apiBase}/usuario/status`, {
@@ -140,8 +151,9 @@ async function iniciarClerk() {
 
     if (window.Clerk.user) {
         const verificado = await verificarDocumentacao();
+        const hasProfile = hasSavedProfile() || await hasPublishedProfile();
         window.location.href = verificado
-            ? (hasSavedProfile() ? "/front-end/artista/index.html?me=1" : "/front-end/escolha-perfil/index.html")
+            ? (hasProfile ? "/front-end/artista/index.html?me=1" : "/front-end/escolha-perfil/index.html")
             : "/front-end/verificacao-documento/index.html";
         return;
     }

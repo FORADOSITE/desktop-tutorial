@@ -6,6 +6,7 @@ const { verifyToken } = require("@clerk/backend");
 const rootDir = path.resolve(__dirname, "..");
 const envFile = path.join(__dirname, ".env");
 const profilesFile = path.join(__dirname, "data", "profiles.json");
+const verificationsFile = path.join(__dirname, "data", "verifications.json");
 const mimeTypes = {
     ".css": "text/css; charset=utf-8",
     ".gif": "image/gif",
@@ -63,8 +64,23 @@ function serveFile(response, requestPath) {
     fs.createReadStream(filePath).pipe(response);
 }
 
-const localVerifiedUsers = new Set();
 const acceptedDocumentTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+function loadVerifiedUsers() {
+    try {
+        const users = JSON.parse(fs.readFileSync(verificationsFile, "utf8"));
+        return new Set(Array.isArray(users) ? users : []);
+    } catch {
+        return new Set();
+    }
+}
+
+function saveVerifiedUser(userId) {
+    const users = loadVerifiedUsers();
+    users.add(userId);
+    fs.mkdirSync(path.dirname(verificationsFile), { recursive: true });
+    fs.writeFileSync(verificationsFile, JSON.stringify([...users], null, 2));
+}
 
 function loadFeaturedProfiles() {
     try {
@@ -91,7 +107,7 @@ function saveFeaturedProfile(profile) {
         image_perfil: typeof profile.image_perfil === "string" && profile.image_perfil.startsWith("data:image/")
             ? profile.image_perfil.slice(0, 8 * 1024 * 1024)
             : null,
-        ativo: profile.ativo === true,
+        ativo: profile.ativo !== false,
     };
     if (existingIndex === -1) profiles.push(savedProfile);
     else profiles[existingIndex] = savedProfile;
@@ -220,7 +236,7 @@ const server = http.createServer((request, response) => {
 
     if (requestUrl.pathname === "/api/usuario/status") {
         getAuthenticatedUserId(authorization).then((userId) => {
-            sendJson(response, 200, { verificado: Boolean(userId && localVerifiedUsers.has(userId)) });
+            sendJson(response, 200, { verificado: Boolean(userId && loadVerifiedUsers().has(userId)) });
         });
         return;
     }
@@ -251,7 +267,7 @@ const server = http.createServer((request, response) => {
                     sendJson(response, 400, { success: false, error: "Envie fotos JPEG, PNG ou WEBP válidas da frente e do verso do RG." });
                     return;
                 }
-                localVerifiedUsers.add(userId);
+                saveVerifiedUser(userId);
                 sendJson(response, 201, { success: true });
             });
         });
@@ -305,6 +321,18 @@ const server = http.createServer((request, response) => {
 
     if (requestUrl.pathname === "/api/usuario/destaques") {
         sendJson(response, 200, loadFeaturedProfiles().filter((profile) => profile.ativo !== false));
+        return;
+    }
+
+    const publicProfileMatch = requestUrl.pathname.match(/^\/api\/usuario\/([^/]+)$/);
+    if (publicProfileMatch) {
+        const name = decodeURIComponent(publicProfileMatch[1]);
+        const profile = loadFeaturedProfiles().find((item) => normalizeName(item.nome) === normalizeName(name) && item.ativo !== false);
+        if (!profile) {
+            sendJson(response, 404, { error: "Usuário não encontrado" });
+            return;
+        }
+        sendJson(response, 200, [profile]);
         return;
     }
 

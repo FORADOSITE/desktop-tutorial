@@ -346,10 +346,11 @@ function createProfileSlug(value) {
 }
 
 function profilesForCategory(categoryKey) {
+    const normalizedKey = normalizeCategory(categoryKey).replace(/\s+/g, "-");
     if (["musica", "artista"].includes(categoryKey)) {
         return availableProfiles.filter((profile) => !profile.categoria || ["musica", "artista"].includes(normalizeCategory(profile.categoria)));
     }
-    return availableProfiles.filter((profile) => normalizeCategory(profile.categoria) === categoryKey);
+    return availableProfiles.filter((profile) => normalizeCategory(profile.categoria).replace(/\s+/g, "-") === normalizedKey);
 }
 
 function renderCategoryProfiles(categoryKey) {
@@ -379,8 +380,9 @@ fetch(`${apiURL}/usuario/destaques`)
             return;
         }
 
-        renderArtistCards(availableProfiles, artistsGrid);
-        if (featuredProfiles) renderArtistCards([...availableProfiles].sort((a, b) => Number(b.acessos || 0) - Number(a.acessos || 0)).slice(0, 3), featuredProfiles);
+        const highlights = [...availableProfiles].sort((a, b) => Number(b.acessos || 0) - Number(a.acessos || 0)).slice(0, 3);
+        renderArtistCards(highlights, artistsGrid);
+        if (featuredProfiles) renderArtistCards(highlights, featuredProfiles);
     })
     .catch((error) => {
         console.error("Erro ao carregar destaques:", error);
@@ -720,10 +722,7 @@ document.querySelectorAll("[data-profile-category]").forEach((categoryButton) =>
         renderCategoryProfiles(categoryButton.dataset.profileCategory);
         categoryDialogBrowse.onclick = () => {
             fecharCategoryDialog();
-            artistsGrid.innerHTML = "";
-            const profiles = profilesForCategory(categoryButton.dataset.profileCategory);
-            renderArtistCards(profiles, artistsGrid);
-            document.getElementById("artistas")?.scrollIntoView({ behavior: "smooth" });
+            window.location.href = `/front-end/categoria/index.html?categoria=${encodeURIComponent(categoryButton.dataset.profileCategory)}`;
         };
         let selectedType = category.types[0];
         const updateAction = () => {

@@ -123,9 +123,9 @@ async function loadProfile() {
         }
     }
 
-    const name = params.get("nome");
     const slug = params.get("perfil");
-    if (!name) {
+    const name = params.get("nome");
+    if (!slug && !name) {
         document.getElementById("profile-status").textContent = "Perfil não encontrado.";
         return;
     }
