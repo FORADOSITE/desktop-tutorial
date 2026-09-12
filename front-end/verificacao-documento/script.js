@@ -1,11 +1,28 @@
 const apiBase = window.location.protocol === "file:" || ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname) && window.location.port !== "3000"
     ? "http://localhost:3000/api"
     : "/api";
+const UPLOAD_TIMEOUT_MS = 30000;
 const form = document.getElementById("verification-form");
 const statusElement = document.getElementById("status");
 const dataNascimentoElement = document.getElementById("data-nascimento");
 const nomeElement = document.getElementById("nome");
 const nomeContaElement = document.getElementById("nome-conta");
+
+async function fetchComTimeout(url, options = {}, timeoutMs = UPLOAD_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } catch (error) {
+        if (error.name === "AbortError") {
+            throw new Error("O envio demorou demais. Verifique sua conexão e tente novamente.");
+        }
+        throw error;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
 
 function dataLimiteParaMaioridade() {
     const hoje = new Date();
@@ -92,7 +109,9 @@ form.addEventListener("submit", async (event) => {
         return;
     }
 
-    if (dataNascimentoElement.value > dataNascimentoElement.max) {
+    const dataNascimento = new Date(dataNascimentoElement.value);
+    const limiteMaioridade = new Date(dataLimiteParaMaioridade());
+    if (Number.isNaN(dataNascimento.getTime()) || dataNascimento > limiteMaioridade) {
         mostrarStatus("É necessário ter 18 anos ou mais para criar um perfil.", true);
         return;
     }
@@ -101,7 +120,7 @@ form.addEventListener("submit", async (event) => {
     mostrarStatus("Enviando documentos...");
     try {
         const token = await window.Clerk.session.getToken();
-        const response = await fetch(`${apiBase}/usuario`, {
+        const response = await fetchComTimeout(`${apiBase}/usuario`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body: new FormData(form),

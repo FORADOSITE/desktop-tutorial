@@ -28,6 +28,50 @@ if (fs.existsSync(envFile)) {
 }
 
 const port = Number(process.env.PORT || 3000);
+const allowedAccountEmails = new Set((process.env.ALLOWED_ACCOUNT_EMAILS || "").split(",").map((value) => value.trim().toLowerCase()).filter(Boolean));
+
+function normalizeEmail(value) {
+    return String(value || "").trim().toLowerCase();
+}
+
+function extractEmailFromClaims(claims) {
+    if (!claims || typeof claims !== "object") return "";
+
+    const candidates = [
+        claims.email,
+        claims.primary_email_address,
+        claims.primaryEmailAddress,
+        claims.email_address,
+        claims.emailAddress,
+        claims.user?.email,
+        claims.user?.primary_email_address,
+        claims.user?.primaryEmailAddress,
+        Array.isArray(claims.email_addresses) ? claims.email_addresses.map((entry) => entry?.email_address || entry?.email || entry) : [],
+        Array.isArray(claims.emailAddresses) ? claims.emailAddresses.map((entry) => entry?.email_address || entry?.email || entry) : [],
+    ].flat();
+
+    for (const value of candidates) {
+        if (typeof value === "string") {
+            const normalized = normalizeEmail(value);
+            if (normalized) return normalized;
+        }
+        if (value && typeof value === "object") {
+            const normalized = normalizeEmail(value.email_address || value.email || value.address || "");
+            if (normalized) return normalized;
+        }
+    }
+
+    return "";
+}
+
+function isAllowedAccount(claims) {
+    const email = extractEmailFromClaims(claims);
+    return Boolean(email && allowedAccountEmails.has(email));
+}
+
+function normalizeKey(value) {
+    return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLowerCase();
+}
 
 function sendJson(response, statusCode, body) {
     setSecurityHeaders(response);
@@ -94,10 +138,22 @@ function loadFeaturedProfiles() {
 function saveFeaturedProfile(profile) {
     const profiles = loadFeaturedProfiles();
     const normalizedName = normalizeName(profile.nome);
+    const email = normalizeEmail(profile.email || "");
+    const usuario = normalizeKey(profile.usuario || "");
     const existingIndex = profiles.findIndex((item) => normalizeName(item.nome) === normalizedName);
     const existingProfile = existingIndex === -1 ? null : profiles[existingIndex];
+    const exactDuplicateIndex = profiles.findIndex((item) => {
+        return normalizeName(item.nome) === normalizedName
+            && normalizeKey(item.usuario || "") === usuario
+            && normalizeEmail(item.email || "") === email;
+    });
+    if (exactDuplicateIndex !== -1 && exactDuplicateIndex !== existingIndex) {
+        throw new Error("Já existe um usuário com o mesmo nome, usuário e e-mail.");
+    }
     const savedProfile = {
         nome: String(profile.nome).trim().slice(0, 80),
+        usuario: String(profile.usuario || "").trim().slice(0, 60),
+        email: normalizeEmail(profile.email || ""),
         slug: normalizedName.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
         titulo: String(profile.titulo || "Artista independente").trim().slice(0, 90),
         bio: String(profile.bio || "").trim().slice(0, 600),
@@ -125,17 +181,21 @@ function incrementFeaturedProfileAccess(slug) {
     return profile;
 }
 
-async function getAuthenticatedUserId(authorization) {
+async function getAuthenticatedUserInfo(authorization) {
     const token = authorization.replace(/^Bearer\s+/i, "").trim();
     if (!token || !process.env.CLERK_SECRET_KEY) return null;
 
     try {
-        const claims = await verifyToken(token, { secretKey: process.env.CLERK_SECRET_KEY });
-        return claims.sub || null;
+        return await verifyToken(token, { secretKey: process.env.CLERK_SECRET_KEY });
     } catch (error) {
         console.error("Falha ao validar token Clerk:", error.message);
         return null;
     }
+}
+
+async function getAuthenticatedUserId(authorization) {
+    const claims = await getAuthenticatedUserInfo(authorization);
+    return claims?.sub || null;
 }
 
 function isAdult(dateValue) {
@@ -225,6 +285,7 @@ const server = http.createServer((request, response) => {
             clerkPublishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
                 || process.env.CLERK_PUBLISHABLE_KEY
                 || null,
+            accountAccessBlocked: blockAllAccounts,
         });
         return;
     }
@@ -235,8 +296,10 @@ const server = http.createServer((request, response) => {
     }
 
     if (requestUrl.pathname === "/api/usuario/status") {
-        getAuthenticatedUserId(authorization).then((userId) => {
-            sendJson(response, 200, { verificado: Boolean(userId && loadVerifiedUsers().has(userId)) });
+        getAuthenticatedUserInfo(authorization).then((claims) => {
+            const userId = claims?.sub || null;
+            const isAllowed = isAllowedAccount(claims);
+            sendJson(response, 200, { verificado: Boolean((userId && loadVerifiedUsers().has(userId)) || isAllowed) });
         });
         return;
     }
@@ -246,7 +309,9 @@ const server = http.createServer((request, response) => {
             const fields = body && parseMultipart(request, body);
             const frente = fields?.documento_frente;
             const verso = fields?.documento_verso;
-            getAuthenticatedUserId(authorization).then((userId) => {
+            getAuthenticatedUserInfo(authorization).then((claims) => {
+                const userId = claims?.sub || null;
+                const allowBypass = isAllowedAccount(claims);
                 if (!userId) {
                     sendJson(response, 401, { success: false, error: "Faça login para continuar." });
                     return;
@@ -259,13 +324,23 @@ const server = http.createServer((request, response) => {
                     sendJson(response, 409, { success: false, code: "NOME_DIVERGENTE", error: "O nome precisa ser o mesmo usado no cadastro." });
                     return;
                 }
-                if (!isAdult(fields.data_nascimento)) {
-                    sendJson(response, 403, { success: false, code: "IDADE_MINIMA", error: "É necessário ter 18 anos ou mais para criar um perfil." });
-                    return;
-                }
-                if (!hasValidImageSignature(frente) || !hasValidImageSignature(verso)) {
-                    sendJson(response, 400, { success: false, error: "Envie fotos JPEG, PNG ou WEBP válidas da frente e do verso do RG." });
-                    return;
+                if (!allowBypass) {
+                    if (!fields.data_nascimento) {
+                        sendJson(response, 400, { success: false, error: "Informe a data de nascimento conforme o RG." });
+                        return;
+                    }
+                    if (!isAdult(fields.data_nascimento)) {
+                        sendJson(response, 403, { success: false, code: "IDADE_MINIMA", error: "É necessário ter 18 anos ou mais para criar um perfil." });
+                        return;
+                    }
+                    if (!frente || !verso) {
+                        sendJson(response, 400, { success: false, error: "Envie a frente e o verso do RG para continuar." });
+                        return;
+                    }
+                    if (!hasValidImageSignature(frente) || !hasValidImageSignature(verso)) {
+                        sendJson(response, 400, { success: false, error: "As imagens do RG estão corrompidas, fora do formato ou muito grandes. Envie JPG, PNG ou WEBP válidos até 5 MB." });
+                        return;
+                    }
                 }
                 saveVerifiedUser(userId);
                 sendJson(response, 201, { success: true });
@@ -282,9 +357,11 @@ const server = http.createServer((request, response) => {
                     sendJson(response, 400, { success: false, error: "Informe o nome do perfil." });
                     return;
                 }
-                sendJson(response, 201, { success: true, profile: saveFeaturedProfile({ ...profile, ativo: true }) });
-            } catch {
-                sendJson(response, 400, { success: false, error: "Dados de perfil inválidos." });
+                const savedProfile = saveFeaturedProfile({ ...profile, ativo: true });
+                sendJson(response, 201, { success: true, profile: savedProfile });
+            } catch (error) {
+                const message = error?.message || "Dados de perfil inválidos.";
+                sendJson(response, 409, { success: false, error: message });
             }
         });
         return;

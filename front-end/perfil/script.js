@@ -47,6 +47,8 @@ async function syncFeaturedProfile() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 nome: profileState.name,
+                usuario: window.Clerk?.user?.username || profileState.name,
+                email: window.Clerk?.user?.primaryEmailAddress?.emailAddress || "",
                 titulo: profileState.role,
                 bio: profileState.bio,
                 image_perfil: profileState.avatarUrl,
@@ -55,7 +57,10 @@ async function syncFeaturedProfile() {
                 ativo: true,
             }),
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+            const result = await response.json().catch(() => ({}));
+            throw new Error(result.error || `HTTP ${response.status}`);
+        }
         const result = await response.json();
         if (!result.success || !result.profile?.ativo) throw new Error("Perfil não foi ativado");
         profileState.ativo = true;
