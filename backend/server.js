@@ -29,6 +29,7 @@ if (fs.existsSync(envFile)) {
 
 const port = Number(process.env.PORT || 3000);
 const allowedAccountEmails = new Set((process.env.ALLOWED_ACCOUNT_EMAILS || "").split(",").map((value) => value.trim().toLowerCase()).filter(Boolean));
+const blockAllAccounts = process.env.BLOCK_ALL_ACCOUNTS === "true";
 
 function normalizeEmail(value) {
     return String(value || "").trim().toLowerCase();
