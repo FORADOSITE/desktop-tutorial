@@ -45,6 +45,8 @@ input:focus { border-color: var(--verification-green); box-shadow: 0 0 0 3px var
 .submit-button { min-height: 50px; border: 0; border-radius: 3px; color: var(--verification-black); background: var(--verification-green); font: inherit; font-weight: 800; cursor: pointer; }
 .submit-button:hover { box-shadow: 0 0 25px var(--verification-glow); }
 .submit-button:disabled { cursor: wait; opacity: 0.6; }
+.back-step { display: block; margin-top: 16px; color: var(--verification-muted); font-size: 13px; text-align: center; text-decoration: none; }
+.back-step:hover { color: var(--verification-green); }
 
 @media (max-width: 620px) {
     .verification-shell { align-items: start; padding: 16px 12px 28px; }

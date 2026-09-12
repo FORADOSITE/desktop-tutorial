@@ -22,6 +22,11 @@ function selectCard(card) {
     cards.forEach((item) => item.classList.toggle("selected", item === card));
 }
 
+const savedCategory = localStorage.getItem(storageCategory);
+const savedType = localStorage.getItem(storageType);
+const savedCard = cards.find((card) => card.dataset.category === savedCategory && card.dataset.type === savedType);
+if (savedCard) selectCard(savedCard);
+
 cards.forEach((card) => card.addEventListener("click", () => selectCard(card)));
 
 form.addEventListener("submit", (event) => {

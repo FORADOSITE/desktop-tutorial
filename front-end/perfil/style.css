@@ -60,6 +60,8 @@ body::before {
 
 .editor-column { min-width: 0; }
 .page-intro { max-width: 630px; padding-bottom: 44px; border-bottom: 1px solid var(--profile-line); }
+.page-intro .back-step { display: inline-block; margin-bottom: 28px; color: var(--profile-muted); font-size: 12px; text-decoration: none; }
+.page-intro .back-step:hover { color: var(--profile-green); }
 .eyebrow { display: block; margin-bottom: 10px; color: var(--profile-green); font-size: 10px; font-weight: 800; letter-spacing: 0.2em; }
 .page-intro h1 { margin: 0; font-family: "Barlow Condensed", sans-serif; font-size: clamp(60px, 8vw, 112px); font-weight: 900; line-height: 0.82; letter-spacing: 0; }
 .page-intro h1 em { color: var(--profile-green); font-style: normal; }

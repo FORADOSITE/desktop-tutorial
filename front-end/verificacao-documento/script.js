@@ -7,6 +7,25 @@ const statusElement = document.getElementById("status");
 const dataNascimentoElement = document.getElementById("data-nascimento");
 const nomeElement = document.getElementById("nome");
 const nomeContaElement = document.getElementById("nome-conta");
+const draftStorageKey = "fora-do-site-verification-draft";
+const editMode = new URLSearchParams(window.location.search).get("modo") === "editar";
+
+function carregarRascunho() {
+    try {
+        const draft = JSON.parse(sessionStorage.getItem(draftStorageKey)) || {};
+        dataNascimentoElement.value = draft.dataNascimento || "";
+        document.getElementById("aceite-documentos").checked = draft.aceite === true;
+    } catch {
+        sessionStorage.removeItem(draftStorageKey);
+    }
+}
+
+function salvarRascunho() {
+    sessionStorage.setItem(draftStorageKey, JSON.stringify({
+        dataNascimento: dataNascimentoElement.value,
+        aceite: document.getElementById("aceite-documentos").checked,
+    }));
+}
 
 async function fetchComTimeout(url, options = {}, timeoutMs = UPLOAD_TIMEOUT_MS) {
     const controller = new AbortController();
@@ -30,6 +49,9 @@ function dataLimiteParaMaioridade() {
 }
 
 dataNascimentoElement.max = dataLimiteParaMaioridade();
+carregarRascunho();
+dataNascimentoElement.addEventListener("input", salvarRascunho);
+document.getElementById("aceite-documentos").addEventListener("change", salvarRascunho);
 
 function mostrarStatus(message, error = false) {
     statusElement.textContent = message;
@@ -90,7 +112,7 @@ async function iniciar() {
 
     const token = await window.Clerk.session.getToken();
     const response = await fetch(`${apiBase}/usuario/status`, { headers: { Authorization: `Bearer ${token}` } });
-    if (response.ok && (await response.json()).verificado) window.location.href = "/front-end/perfil/index.html";
+    if (response.ok && (await response.json()).verificado && !editMode) window.location.href = "/front-end/perfil/index.html";
 }
 
 form.addEventListener("submit", async (event) => {
@@ -127,6 +149,7 @@ form.addEventListener("submit", async (event) => {
         });
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error || "Não foi possível concluir a verificação.");
+        sessionStorage.removeItem(draftStorageKey);
         window.location.href = "/front-end/escolha-perfil/index.html";
     } catch (error) {
         mostrarStatus(error.message, true);
