@@ -78,7 +78,7 @@ async function iniciar() {
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const button = event.submitter;
+    const button = event.submitter || form.querySelector("button[type=\"submit\"]");
     const frente = document.getElementById("documento-frente").files[0];
     const verso = document.getElementById("documento-verso").files[0];
 
