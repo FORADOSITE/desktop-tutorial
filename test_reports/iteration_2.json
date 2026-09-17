@@ -1,0 +1,84 @@
+{
+  "passed": 4,
+  "failed": 3,
+  "bugs": [
+    {
+      "severity": "high",
+      "criterion": "O plano Premium salvo é aplicado no perfil / O perfil recupera o plano persistido pelo backend",
+      "description": "The frontend-facing dev server (port 3000, backend/server.js, which is what the browser actually calls via relative /api/* paths) has NO route for GET /api/subscriptions/{id}, GET /api/owner/status, or POST /api/owner/entitlement. It only implements /api/config, /api/usuario/status, /api/catalog/plans and /api/subscriptions (list/create). Any other /api/* path falls through to the static file handler and returns 404 {\"error\":\"Arquivo não encontrado\"}. As a result perfil/script.js's fetch to /api/subscriptions/{id} always 404s from the real frontend origin, so the profile page can never show the Premium badge/3-preview limit even though the subscription was created and IS retrievable directly from the FastAPI backend on :8001. The owner banner/entitlement flow in catalogo/script.js is equally broken from the frontend origin.",
+      "evidence": "curl http://localhost:3000/api/subscriptions/sub_1789566864667 -> 404 {\"error\":\"Arquivo não encontrado\"}; curl http://localhost:8001/api/subscriptions/sub_1789566864667 -> 200 with the correct subscription body. curl http://localhost:3000/api/owner/status -> 404 same error (vs 401 JSON from :8001). Browser check profile-applies-premium-plan-badge-and-limit created a real premium subscription via POST /api/subscriptions, stored its id, reloaded /front-end/perfil/index.html and observed the profile stayed on 'PLANO GRATUITO' because the id lookup 404'd (network log captured: 'subscription fetch status via frontend origin 404')."
+    },
+    {
+      "severity": "medium",
+      "criterion": "Sem assinatura Premium o perfil mantém o limite Gratuito (esconde o selo)",
+      "description": "front-end/perfil/style.css defines `.premium-badge { display: inline-flex; ... }` unconditionally. This author rule overrides the browser's default `[hidden]{display:none}` UA rule for the same element, so even though script.js correctly sets/keeps the `hidden` attribute on #premium-badge when the plan is Gratuito, the badge renders visible anyway. The header plan-status text correctly says 'PLANO GRATUITO', but the public preview card still shows '✓ PREMIUM VERIFICADO'.",
+      "evidence": "Browser check profile-defaults-to-free-plan-without-subscription: after clearing localStorage and reloading /front-end/perfil/index.html, getByTestId('profile-premium-badge') resolved to `<span hidden=\"\" id=\"premium-badge\" class=\"premium-badge\" data-testid=\"profile-premium-badge\">✓ PREMIUM VERIFICADO</span>` yet Playwright's toBeHidden() reported it as visible (screenshot confirms the neon badge rendered on the public card while the header still reads PLANO GRATUITO)."
+    }
+  ],
+  "action_items": [
+    {
+      "type": "test_credentials_missing",
+      "severity": "high",
+      "description": "Could not fully exercise the owner-benefit criterion (active_owner for isbingsc@gmail.com, 403 for a non-owner). The Clerk account for isbingsc@gmail.com exists in the test instance, and a session can be minted server-side via clerk_backend_api (sessions.create + create_token), but tokens minted this way never carry an `azp` claim. backend/lib/auth.py always passes authorized_parties=[APP_URL] to authenticate_request, and clerk_backend_api's verifier unconditionally rejects any token with a missing azp claim when authorized_parties is set (see security/verifytoken.py: `if azp is None or azp not in options.authorized_parties: raise ...`). So every backend-minted test token is rejected with 401 before the owner-email comparison is reached, regardless of Origin headers. Only a real browser-completed Clerk sign-in bound to the app's origin would carry a valid azp, and completing that requires OTP email access that was not provided. Verified instead that the endpoints correctly require authentication (401 without/with invalid token) and confirmed via clerk-backend-api that the owner Clerk user already exists in this test instance."
+    }
+  ],
+  "retest_needed": true,
+  "checks": [
+    {
+      "criterion": "A API pública fornece a configuração necessária ao Clerk sem expor segredo",
+      "name": "test_tscheck_public_config.py::test_public_config_exposes_only_publishable_key",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/config (localhost:8001) returned 200 {\"clerkPublishableKey\":\"pk_test_...\"}; asserted key startswith pk_test_, response is exactly {clerkPublishableKey}, and raw body contains neither 'CLERK_SECRET_KEY' nor 'sk_test_'."
+    },
+    {
+      "criterion": "A tela Criar Perfil carrega o formulário do Clerk",
+      "name": "login-signup-form-mounts",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Opened /front-end/login/index.html?cadastro=1; #clerk-auth mounted real Clerk sign-up inputs (Nome, Sobrenome, Nome de usuário, E-mail placeholders visible) with no failure message."
+    },
+    {
+      "criterion": "A tela Entrar carrega o formulário do Clerk",
+      "name": "login-signin-form-mounts",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Opened /front-end/login/index.html?cadastro=0; #clerk-auth mounted the Clerk sign-in form inputs with no /api/config or auth-failure message."
+    },
+    {
+      "criterion": "O plano Premium salvo é aplicado no perfil",
+      "name": "profile-applies-premium-plan-badge-and-limit",
+      "lane": "browser",
+      "status": "failed",
+      "evidence": "Created a mocked premium subscription via POST /api/subscriptions (201), stored its id in localStorage, reloaded the profile page; GET /api/subscriptions/{id} via the frontend origin returned 404, so #profile-plan-status stayed 'PLANO GRATUITO' instead of 'PREMIUM' and the 3-preview limit never applied. See bugs[0]."
+    },
+    {
+      "criterion": "Sem assinatura Premium o perfil mantém o limite Gratuito",
+      "name": "profile-defaults-to-free-plan-without-subscription",
+      "lane": "browser",
+      "status": "failed",
+      "evidence": "With localStorage cleared and no subscription id, #profile-plan-status correctly showed 'PLANO GRATUITO' and #profile-track-limit said '1', but #profile-premium-badge rendered visible despite its `hidden` attribute being set. See bugs[1]."
+    },
+    {
+      "criterion": "A conta proprietária tem benefício Premium Anual sem cobrança protegido por sessão",
+      "name": "test_tscheck_owner_benefit_requires_auth.py",
+      "lane": "backend",
+      "status": "blocked",
+      "evidence": "Confirmed GET /api/owner/status and POST /api/owner/entitlement both return 401 without a token and 401 with an invalid bearer token, i.e. the endpoint does enforce authentication. Could not verify the active_owner/403 branches with a real owner/non-owner session — see action_items[0]."
+    },
+    {
+      "criterion": "O perfil recupera o plano persistido pelo backend",
+      "name": "test_tscheck_subscription_retrieval.py::test_subscription_can_be_fetched_by_id_for_profile_setup",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/subscriptions (localhost:8001) returned 201 for a tscheck-retrieval-<uuid> location; GET /api/subscriptions/{id} returned 200 with matching planId, status confirmed_mock and uppercase UF. A second call with an unknown id returned 404 as expected."
+    },
+    {
+      "criterion": "O perfil recupera o plano persistido pelo backend (uso pelo frontend)",
+      "name": "profile-applies-premium-plan-badge-and-limit",
+      "lane": "browser",
+      "status": "failed",
+      "evidence": "Same run as above: the frontend could not use the saved subscription id because GET /api/subscriptions/{id} 404s from the frontend origin (port 3000) even though it works from the backend origin (port 8001). Same root cause as bugs[0]."
+    }
+  ]
+}

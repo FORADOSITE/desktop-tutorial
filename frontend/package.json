@@ -1,0 +1,8 @@
+{
+  "name": "fora-do-site-preview",
+  "private": true,
+  "scripts": {
+    "dev": "node ../backend/server.js",
+    "typecheck": "tsc --noEmit --strict src/types.ts"
+  }
+}

@@ -1,32 +1,11 @@
 const authContainer = document.getElementById("clerk-auth");
 const cadastro = new URLSearchParams(window.location.search).get("cadastro") === "1";
-const params = new URLSearchParams(window.location.search);
-const categoria = params.get("categoria") || localStorage.getItem("fora-do-site-category") || "Música";
-const tipo = params.get("tipo") || localStorage.getItem("fora-do-site-profile-type") || "Artista";
-localStorage.setItem("fora-do-site-category", categoria);
-localStorage.setItem("fora-do-site-profile-type", tipo);
 document.documentElement.dataset.authMode = cadastro ? "signup" : "signin";
 const isLocalDevelopment = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
     && window.location.port !== "3000";
 const apiBase = window.location.protocol === "file:" || isLocalDevelopment
     ? "http://localhost:3000/api"
     : "/api";
-const deviceStorageKey = "fora-do-site-device-id";
-
-function getDeviceId() {
-    try {
-        let deviceId = localStorage.getItem(deviceStorageKey);
-        if (!deviceId) {
-            deviceId = crypto.randomUUID();
-            localStorage.setItem(deviceStorageKey, deviceId);
-        }
-        return deviceId;
-    } catch {
-        return "";
-    }
-}
-
-const deviceId = getDeviceId();
 
 const clerkAppearance = {
     variables: {
@@ -116,31 +95,14 @@ function observarProvedores() {
     new MutationObserver(ocultarElementosClerk).observe(authContainer, { childList: true, subtree: true });
 }
 
-function hasSavedProfile() {
-    try {
-        return Boolean(JSON.parse(localStorage.getItem("fora-do-site-profile"))?.name);
-    } catch {
-        return false;
-    }
-}
-
-async function hasPublishedProfile() {
-    const nome = window.Clerk.user && (window.Clerk.user.username || [window.Clerk.user.firstName, window.Clerk.user.lastName].filter(Boolean).join(" "));
-    if (!nome) return false;
-    try {
-        const response = await fetch(`${apiBase}/usuario/${encodeURIComponent(nome)}`);
-        return response.ok;
-    } catch {
-        return false;
-    }
-}
-
 async function verificarDocumentacao() {
     const token = await window.Clerk.session.getToken();
     const response = await fetch(`${apiBase}/usuario/status`, {
-        headers: { Authorization: `Bearer ${token}`, "X-Device-Id": deviceId },
+        headers: { Authorization: `Bearer ${token}` },
     });
-    return response.json().catch(() => ({}));
+    if (!response.ok) return false;
+    const status = await response.json();
+    return status.verificado === true;
 }
 
 async function iniciarClerk() {
@@ -164,15 +126,9 @@ async function iniciarClerk() {
     });
 
     if (window.Clerk.user) {
-        const status = await verificarDocumentacao();
-        if (status.dispositivoPermitido === false) {
-            window.location.href = `/front-end/seguranca-dispositivo/index.html?email=${encodeURIComponent(status.email || "seu e-mail cadastrado")}`;
-            return;
-        }
-        const verificado = status.verificado === true;
-        const hasProfile = status.perfilPublicado === true || hasSavedProfile() || await hasPublishedProfile();
+        const verificado = await verificarDocumentacao();
         window.location.href = verificado
-            ? (hasProfile ? "/front-end/artista/index.html?me=1" : "/front-end/escolha-perfil/index.html")
+            ? "/front-end/perfil/index.html"
             : "/front-end/verificacao-documento/index.html";
         return;
     }
@@ -182,7 +138,7 @@ async function iniciarClerk() {
 
     const signInOptions = {
         routing: "hash",
-        signUpUrl: `/front-end/login/index.html?cadastro=1&categoria=${encodeURIComponent(categoria)}`,
+        signUpUrl: "/front-end/login/index.html?cadastro=1",
         afterSignInUrl: "/front-end/verificacao-documento/index.html",
         appearance: clerkAppearance,
     };
@@ -190,7 +146,7 @@ async function iniciarClerk() {
     if (cadastro) {
         window.Clerk.mountSignUp(authContainer, {
             routing: "hash",
-            signInUrl: `/front-end/login/index.html?cadastro=0&categoria=${encodeURIComponent(categoria)}`,
+            signInUrl: "/front-end/login/index.html?cadastro=0",
             afterSignUpUrl: "/front-end/verificar-email/index.html",
             appearance: clerkAppearance,
         });
@@ -202,5 +158,20 @@ async function iniciarClerk() {
 
 iniciarClerk().catch((error) => {
     console.error("Falha ao inicializar o Clerk:", error);
-    authContainer.textContent = "Não foi possível carregar a autenticação. Tente novamente.";
+    authContainer.replaceChildren();
+    const wrapper = document.createElement("div");
+    wrapper.className = "local-api-error";
+    wrapper.dataset.testid = "auth-api-connection-error";
+    const title = document.createElement("strong");
+    title.textContent = "O servidor local não está ativo.";
+    const message = document.createElement("p");
+    message.textContent = "Na pasta do projeto, execute yarn dev e acesse o site em localhost:3000.";
+    const command = document.createElement("code");
+    command.textContent = "yarn dev";
+    const link = document.createElement("a");
+    link.href = `/front-end/login/index.html?cadastro=${cadastro ? "1" : "0"}`;
+    link.textContent = "Tentar novamente →";
+    link.dataset.testid = "auth-api-retry-link";
+    wrapper.append(title, message, command, link);
+    authContainer.appendChild(wrapper);
 });

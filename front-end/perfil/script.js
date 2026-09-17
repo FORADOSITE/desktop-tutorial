@@ -1,78 +1,47 @@
 const defaultAvatar = "/front-end/intro/img/fds.png";
 const storageKey = "fora-do-site-profile";
-const categoryStorageKey = "fora-do-site-category";
-const isLocalFrontend = window.location.protocol === "file:" || window.location.port === "5500";
-const apiBase = isLocalFrontend
-    ? `${window.location.protocol === "file:" ? "http:" : window.location.protocol}//${window.location.hostname || "localhost"}:3000/api`
-    : "/api";
-const storedCategory = localStorage.getItem(categoryStorageKey) || "Música";
-const storedProfileType = localStorage.getItem("fora-do-site-profile-type") || "Artista";
-const profileCategory = ["Música", "Artista"].includes(storedCategory) ? storedProfileType : storedCategory;
+const subscriptionStorageKey = "fora-do-site-subscription-id";
 let profileState = loadState();
 let pendingAvatarUrl = null;
-let clerkUser = null;
-let pendingEmailAddress = null;
-
-function carregarScript(src, attributes = {}) {
-    return new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.crossOrigin = "anonymous";
-        script.src = src;
-        Object.entries(attributes).forEach(([name, value]) => script.setAttribute(name, value));
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-    });
-}
-
-async function carregarClerk() {
-    if (window.Clerk?.user && window.Clerk?.session) {
-        clerkUser = window.Clerk.user;
-        return clerkUser;
-    }
-    const config = await fetch(`${apiBase}/config`).then((response) => response.json());
-    if (!config.clerkPublishableKey) throw new Error("A autenticação ainda não está configurada.");
-    const clerkDomain = atob(config.clerkPublishableKey.split("_")[2]).slice(0, -1);
-    await carregarScript(`https://${clerkDomain}/npm/@clerk/ui@1/dist/ui.browser.js`);
-    await carregarScript(`https://${clerkDomain}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, {
-        "data-clerk-publishable-key": config.clerkPublishableKey,
-    });
-    await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
-    clerkUser = window.Clerk.user;
-    if (!clerkUser) throw new Error("Sua sessão expirou. Entre novamente para editar a conta.");
-    return clerkUser;
-}
-
-function mostrarStatusConta(message, error = false) {
-    const status = document.getElementById("account-status");
-    status.textContent = message;
-    status.classList.toggle("error", error);
-}
-
-async function prepararConfiguracoes() {
-    const user = await carregarClerk();
-    document.getElementById("current-email").value = user.primaryEmailAddress?.emailAddress || "";
-}
+let activeSubscription = null;
 
 function loadState() {
     try {
-        const savedState = JSON.parse(localStorage.getItem(storageKey)) || {};
-        return {
-            tracks: [],
-            socials: {},
-            projects: [],
-            ...savedState,
-            tracks: Array.isArray(savedState.tracks) ? savedState.tracks : [],
-            socials: savedState.socials && typeof savedState.socials === "object" ? savedState.socials : {},
-            projects: Array.isArray(savedState.projects) ? savedState.projects : [],
-        };
+        const saved = JSON.parse(localStorage.getItem(storageKey)) || {};
+        return { ...saved, tracks: saved.tracks || [], socials: saved.socials || {} };
     } catch {
-        return { tracks: [], socials: {}, projects: [] };
+        return { tracks: [], socials: {} };
     }
 }
 
+function trackLimit() {
+    return ["premium", "premium-anual"].includes(activeSubscription?.planId) ? 3 : 1;
+}
+
+function renderPlanAccess() {
+    const premium = trackLimit() === 3;
+    const planStatus = document.getElementById("plan-status");
+    planStatus.textContent = premium ? activeSubscription.planTitle.toUpperCase() : "PLANO GRATUITO";
+    planStatus.classList.toggle("premium", premium);
+    document.getElementById("premium-badge").hidden = !premium;
+    document.getElementById("track-limit-note").textContent = `Adicione até ${trackLimit()} ${trackLimit() === 1 ? "trecho" : "trechos"} entre 15 e 30 segundos para as pessoas conhecerem seu som.`;
+}
+
+async function loadPlanAccess() {
+    const subscriptionId = localStorage.getItem(subscriptionStorageKey);
+    if (!subscriptionId) return renderPlanAccess();
+    try {
+        const response = await fetch(`/api/subscriptions/${encodeURIComponent(subscriptionId)}`);
+        if (!response.ok) throw new Error("Assinatura não encontrada");
+        activeSubscription = (await response.json()).subscription;
+    } catch (error) {
+        console.warn("Não foi possível carregar o plano ativo.", error);
+    }
+    renderPlanAccess();
+}
+
 function saveState() {
-    const stateForStorage = { ...profileState, tracks: profileState.tracks.map(({ previewUrl, ...track }) => track) };
+    const stateForStorage = { ...profileState, tracks: profileState.tracks.map(({ previewUrl, coverUrl, ...track }) => track) };
     localStorage.setItem(storageKey, JSON.stringify(stateForStorage));
 }
 
@@ -80,73 +49,6 @@ function showStatus(message, error = false) {
     const status = document.getElementById("status");
     status.textContent = message;
     status.classList.toggle("error", error);
-}
-
-async function syncFeaturedProfile() {
-    if (!profileState.name) return;
-    try {
-        const user = await carregarClerk();
-        const token = await window.Clerk.session?.getToken();
-        if (!token) throw new Error("Sua sessão expirou. Entre novamente para publicar o perfil.");
-        const response = await fetch(`${apiBase}/usuario/destaques`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                nome: profileState.name,
-                usuario: user.username || profileState.name,
-                email: user.primaryEmailAddress?.emailAddress || "",
-                titulo: profileState.role,
-                bio: profileState.bio,
-                image_perfil: profileState.avatarUrl,
-                categoria: storedCategory,
-                tipo: storedProfileType,
-                ativo: true,
-            }),
-        });
-        if (!response.ok) {
-            const result = await response.json().catch(() => ({}));
-            throw new Error(result.error || `HTTP ${response.status}`);
-        }
-        const result = await response.json();
-        if (!result.success || !result.profile?.ativo) throw new Error("Perfil não foi ativado");
-        profileState.ativo = true;
-        saveState();
-        return true;
-    } catch (error) {
-        console.error("Não foi possível publicar o perfil nos destaques:", error);
-        return false;
-    }
-}
-
-async function saveAndViewProfile() {
-    const name = document.getElementById("profile-name").value.trim();
-    if (!name) {
-        showStatus("Informe seu nome antes de continuar.", true);
-        document.getElementById("profile-name").focus();
-        return;
-    }
-
-    profileState.name = name;
-    profileState.role = document.getElementById("profile-role").value.trim();
-    profileState.bio = document.getElementById("profile-bio").value.trim();
-    profileState.socials = {
-        instagram: document.getElementById("instagram").value.trim(),
-        youtube: document.getElementById("youtube").value.trim(),
-        spotify: document.getElementById("spotify").value.trim(),
-    };
-    if (!Object.entries(profileState.socials).every(([network, value]) => validateUrl(value, network))) return;
-
-    saveState();
-    renderProfile();
-    const synced = await syncFeaturedProfile();
-    if (!synced) {
-        console.warn("Perfil salvo localmente, mas a publicação em destaque falhou. Prosseguindo com a navegação.");
-    }
-    showStatus(synced ? "Perfil salvo e publicado." : "Perfil salvo com sucesso.");
-    window.location.href = "/front-end/artista/index.html?me=1";
 }
 
 function setValue(id, value = "") {
@@ -168,122 +70,7 @@ function renderProfile() {
 
     ["instagram", "youtube", "spotify"].forEach((network) => setValue(network, profileState.socials?.[network] || ""));
     renderSocials();
-    configurePortfolio();
     renderTracks();
-    renderProjects();
-}
-
-function categoryKey() {
-    return profileCategory.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-function configurePortfolio() {
-    const key = categoryKey();
-    const section = document.getElementById("portfolio-section");
-    const tracksSection = document.getElementById("tracks-section");
-    const projectsSection = document.getElementById("projects-section");
-    const publicTracks = document.querySelector(".public-tracks");
-    const form = document.getElementById("portfolio-form");
-    const note = document.getElementById("portfolio-note");
-    document.querySelector(".public-type").textContent = profileCategory.toUpperCase();
-    form.replaceChildren();
-    section.hidden = false;
-    tracksSection.hidden = !["artista", "musica"].includes(key);
-    publicTracks.hidden = tracksSection.hidden;
-    projectsSection.hidden = key !== "projetos";
-
-    if (["artista", "musica", "projetos"].includes(key)) {
-        section.hidden = true;
-        return;
-    }
-
-    if (["beatmaker", "produtor"].includes(key)) {
-        const producer = key === "produtor";
-        document.getElementById("portfolio-title").textContent = producer ? "Contato da gravadora / produtor" : "Contato profissional";
-        note.textContent = producer
-            ? "Informe o nome da gravadora ou do produtor e os canais profissionais para contato."
-            : "Informe apenas os canais para contratar ou falar com você. A plataforma não comercializa beats.";
-        form.innerHTML = `${producer ? '<label for="producer-name">Nome da gravadora / produtor</label><input id="producer-name" maxlength="120" placeholder="Ex.: Estúdio Aurora" required>' : ""}<label for="professional-email">E-mail</label><input id="professional-email" type="email" maxlength="160" placeholder="contato@exemplo.com" required><label for="professional-phone">Celular</label><input id="professional-phone" type="tel" maxlength="25" placeholder="(00) 00000-0000"><button class="primary-button" type="submit">Salvar contato</button>`;
-        if (producer) setValue("producer-name", profileState.producer?.name || "");
-        setValue("professional-email", profileState.producer?.email || profileState.beatmaker?.email || "");
-        setValue("professional-phone", profileState.producer?.phone || profileState.beatmaker?.phone || "");
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            const contact = {
-                email: document.getElementById("professional-email").value.trim(),
-                phone: document.getElementById("professional-phone").value.trim(),
-            };
-            if (producer) contact.name = document.getElementById("producer-name").value.trim();
-            profileState[producer ? "producer" : "beatmaker"] = contact;
-            saveState();
-            showStatus(producer ? "Contato da gravadora / produtor salvo." : "Contato do beatmaker salvo.");
-        });
-        return;
-    }
-
-    const portfolioConfig = {
-        danca: { title: "Vídeos de dança", note: "Adicione vídeos de 15 a 30 segundos.", type: "video", max: 3 },
-        audiovisual: { title: "Vídeos do portfólio", note: "Adicione vídeos de 15 a 30 segundos.", type: "video", max: 3 },
-        moda: { title: "Fotos do portfólio", note: "Adicione até cinco fotos do seu trabalho.", type: "image", max: 5 },
-        "artes visuais": { title: "Obras visuais", note: "Adicione até cinco fotos das suas obras.", type: "image", max: 5 },
-        literatura: { title: "Livros e poesias", note: "Anexe PDFs de livros ou poesias.", type: "pdf", max: 5 },
-    }[key];
-    if (!portfolioConfig) {
-        section.hidden = true;
-        return;
-    }
-    document.getElementById("portfolio-title").textContent = portfolioConfig.title;
-    note.textContent = portfolioConfig.note;
-    const accept = { video: "video/mp4,video/webm,video/quicktime", image: "image/jpeg,image/png,image/webp", pdf: "application/pdf" }[portfolioConfig.type];
-    form.innerHTML = `<label for="portfolio-title-input">Nome ou título</label><input id="portfolio-title-input" maxlength="120" placeholder="Dê um nome ao trabalho" required><label for="portfolio-file">Arquivo <small>${portfolioConfig.type === "video" ? "15–30s" : `até ${portfolioConfig.max} arquivos`}</small></label><input id="portfolio-file" type="file" accept="${accept}" ${portfolioConfig.type === "image" || portfolioConfig.type === "pdf" ? "multiple" : ""} required><button class="primary-button" type="submit">Adicionar ao portfólio</button>`;
-    const items = profileState.portfolio || [];
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const title = document.getElementById("portfolio-title-input").value.trim();
-        const files = [...document.getElementById("portfolio-file").files];
-        if (!files.length || items.length + files.length > portfolioConfig.max) {
-            showStatus(`Você pode adicionar no máximo ${portfolioConfig.max} itens.`, true);
-            return;
-        }
-        const button = event.submitter;
-        button.disabled = true;
-        for (const file of files) {
-            if (portfolioConfig.type === "video") {
-                const duration = await readMediaDuration(file);
-                if (duration === null || duration < 15 || duration > 30) {
-                    showStatus("Cada vídeo precisa ter entre 15 e 30 segundos.", true);
-                    button.disabled = false;
-                    return;
-                }
-            }
-            items.push({ title, type: portfolioConfig.type, name: file.name, url: await readFileAsDataUrl(file) });
-        }
-        profileState.portfolio = items;
-        saveState();
-        renderPortfolioItems(portfolioConfig);
-        event.target.reset();
-        button.disabled = false;
-        showStatus("Item adicionado ao portfólio.");
-    });
-    renderPortfolioItems(portfolioConfig);
-}
-
-function renderPortfolioItems(config) {
-    const list = document.getElementById("portfolio-list");
-    list.replaceChildren();
-    (profileState.portfolio || []).forEach((item, index) => {
-        const card = document.createElement("article");
-        card.className = "portfolio-item";
-        card.innerHTML = `<div><strong></strong><small></small></div><button class="track-remove" type="button" aria-label="Remover item">×</button>`;
-        card.querySelector("strong").textContent = item.title;
-        card.querySelector("small").textContent = item.name;
-        card.querySelector(".track-remove").addEventListener("click", () => {
-            profileState.portfolio.splice(index, 1);
-            saveState();
-            renderPortfolioItems(config);
-        });
-        list.appendChild(card);
-    });
 }
 
 function renderSocials() {
@@ -340,74 +127,6 @@ function renderTracks() {
     });
 }
 
-function renderProjects() {
-    const editorList = document.getElementById("project-list");
-    const publicList = document.getElementById("public-projects-list");
-    const projects = profileState.projects || [];
-    editorList.replaceChildren();
-    publicList.replaceChildren();
-    document.getElementById("project-count").textContent = `${projects.length} ${projects.length === 1 ? "projeto" : "projetos"}`;
-
-    if (!projects.length) {
-        const empty = document.createElement("p");
-        empty.className = "empty-state";
-        empty.textContent = "Seus projetos aparecerão aqui.";
-        publicList.appendChild(empty);
-        return;
-    }
-
-    const projectLabels = { edital: "Edital", show: "Show", batalha: "Batalha" };
-    projects.forEach((project, index) => {
-        const editorProject = document.createElement("article");
-        editorProject.className = "editor-project";
-        editorProject.innerHTML = `<img src="${project.logoUrl}" alt=""><div><strong></strong><small></small></div><button class="track-remove" type="button" aria-label="Remover projeto">×</button>`;
-        editorProject.querySelector("strong").textContent = projectLabels[project.type];
-        editorProject.querySelector("small").textContent = project.description;
-        editorProject.querySelector(".track-remove").addEventListener("click", () => {
-            profileState.projects.splice(index, 1);
-            saveState();
-            renderProjects();
-            showStatus("Projeto removido.");
-        });
-        editorList.appendChild(editorProject);
-
-        const publicProject = document.createElement("article");
-        publicProject.className = "public-project";
-        publicProject.innerHTML = `<img src="${project.logoUrl}" alt=""><div><span></span><p></p><small></small></div>`;
-        publicProject.querySelector("span").textContent = projectLabels[project.type];
-        publicProject.querySelector("p").textContent = project.description;
-        const details = project.type === "show"
-            ? [project.email, project.phoneOne, project.phoneTwo].filter(Boolean).join(" | ")
-            : project.type === "batalha"
-                ? [formatDate(project.date), project.time, project.location].filter(Boolean).join(" | ")
-                : "PDF do edital disponível";
-        publicProject.querySelector("small").textContent = details;
-        if (project.type === "edital" && project.pdfUrl) {
-            const pdfLink = document.createElement("a");
-            pdfLink.href = project.pdfUrl;
-            pdfLink.target = "_blank";
-            pdfLink.rel = "noreferrer";
-            pdfLink.textContent = "Abrir edital em PDF";
-            publicProject.querySelector("div").appendChild(pdfLink);
-        }
-        publicList.appendChild(publicProject);
-    });
-}
-
-function formatDate(value) {
-    if (!value) return "";
-    return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
-}
-
-function readFileAsDataUrl(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
 function validateUrl(value, fieldName) {
     if (!value) return true;
     try {
@@ -438,24 +157,6 @@ function readAudioDuration(file) {
     });
 }
 
-function readMediaDuration(file) {
-    return new Promise((resolve) => {
-        const media = document.createElement("video");
-        const objectUrl = URL.createObjectURL(file);
-        media.preload = "metadata";
-        media.onloadedmetadata = () => {
-            const duration = media.duration;
-            URL.revokeObjectURL(objectUrl);
-            resolve(Number.isFinite(duration) ? duration : null);
-        };
-        media.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            resolve(null);
-        };
-        media.src = objectUrl;
-    });
-}
-
 function readImageUrl(file) {
     return file ? URL.createObjectURL(file) : null;
 }
@@ -472,22 +173,14 @@ document.getElementById("avatar-input").addEventListener("change", (event) => {
     showStatus("Foto de perfil atualizada.");
 });
 
-document.getElementById("view-profile-button").addEventListener("click", async (event) => {
-    const button = event.currentTarget;
-    button.disabled = true;
-    await saveAndViewProfile();
-    button.disabled = false;
-});
-
-document.getElementById("identity-form").addEventListener("submit", async (event) => {
+document.getElementById("identity-form").addEventListener("submit", (event) => {
     event.preventDefault();
     profileState.name = document.getElementById("profile-name").value.trim();
     profileState.role = document.getElementById("profile-role").value.trim();
     profileState.bio = document.getElementById("profile-bio").value.trim();
     saveState();
     renderProfile();
-    const synced = await syncFeaturedProfile();
-    showStatus(synced ? "Identidade salva e publicada." : "Identidade salva com sucesso.");
+    showStatus("Identidade salva.");
 });
 
 document.getElementById("social-form").addEventListener("submit", (event) => {
@@ -510,6 +203,10 @@ document.getElementById("track-form").addEventListener("submit", async (event) =
     const link = document.getElementById("track-link").value.trim();
     const previewFile = document.getElementById("track-preview").files[0];
     const coverFile = document.getElementById("track-cover").files[0];
+    if (profileState.tracks.length >= trackLimit()) {
+        showStatus(`Seu plano permite até ${trackLimit()} ${trackLimit() === 1 ? "prévia" : "prévias"}.`, true);
+        return;
+    }
     if (!validateUrl(link, "a música") || !previewFile) return;
 
     button.disabled = true;
@@ -524,7 +221,7 @@ document.getElementById("track-form").addEventListener("submit", async (event) =
         title,
         link,
         duration: Math.round(duration),
-        coverUrl: coverFile ? await readFileAsDataUrl(coverFile) : null,
+        coverUrl: readImageUrl(coverFile),
         previewUrl: readImageUrl(previewFile),
     });
     saveState();
@@ -534,158 +231,5 @@ document.getElementById("track-form").addEventListener("submit", async (event) =
     showStatus("Prévia adicionada ao seu perfil.");
 });
 
-const projectType = document.getElementById("project-type");
-const projectFields = document.querySelectorAll("[data-project-fields]");
-
-function updateProjectFields() {
-    projectFields.forEach((fields) => {
-        fields.hidden = fields.dataset.projectFields !== projectType.value;
-    });
-    document.getElementById("project-pdf").required = projectType.value === "edital";
-}
-
-projectType.addEventListener("change", updateProjectFields);
-updateProjectFields();
-
-document.getElementById("project-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.submitter;
-    const type = projectType.value;
-    const logoFile = document.getElementById("project-logo").files[0];
-    const pdfFile = document.getElementById("project-pdf").files[0];
-    if (!logoFile || (type === "edital" && (!pdfFile || pdfFile.type !== "application/pdf"))) return;
-    if (type === "show" && !document.getElementById("project-email").value.trim()) {
-        showStatus("Informe o e-mail de contato do show.", true);
-        return;
-    }
-    if (type === "batalha" && (!document.getElementById("project-date").value || !document.getElementById("project-time").value || !document.getElementById("project-location").value.trim())) {
-        showStatus("Informe data, horário e local da batalha.", true);
-        return;
-    }
-
-    button.disabled = true;
-    const project = {
-        type,
-        description: document.getElementById("project-description").value.trim(),
-        logoUrl: await readFileAsDataUrl(logoFile),
-    };
-    if (type === "show") {
-        project.email = document.getElementById("project-email").value.trim();
-        project.phoneOne = document.getElementById("project-phone-one").value.trim();
-        project.phoneTwo = document.getElementById("project-phone-two").value.trim();
-    } else if (type === "batalha") {
-        project.date = document.getElementById("project-date").value;
-        project.time = document.getElementById("project-time").value;
-        project.location = document.getElementById("project-location").value.trim();
-    } else {
-        project.pdfUrl = await readFileAsDataUrl(pdfFile);
-    }
-    profileState.projects = profileState.projects || [];
-    profileState.projects.push(project);
-    saveState();
-    renderProjects();
-    event.target.reset();
-    projectType.value = type;
-    updateProjectFields();
-    button.disabled = false;
-    showStatus("Projeto adicionado ao seu perfil.");
-});
-
-const profileTabs = [...document.querySelectorAll("[data-profile-tab]")];
-const profileSections = [...document.querySelectorAll(".editor-section:not(#account-settings)")];
-const accountSettings = document.getElementById("account-settings");
-
-profileTabs.forEach((tab) => tab.addEventListener("click", async () => {
-    const settingsSelected = tab.dataset.profileTab === "settings";
-    profileTabs.forEach((item) => item.classList.toggle("active", item === tab));
-    profileTabs.forEach((item) => item.setAttribute("aria-selected", String(item === tab)));
-    profileSections.forEach((section) => {
-        if (settingsSelected) {
-            section.dataset.hiddenBeforeSettings = String(section.hidden);
-            section.hidden = true;
-        } else {
-            section.hidden = section.dataset.hiddenBeforeSettings === "true";
-        }
-    });
-    accountSettings.hidden = !settingsSelected;
-    if (settingsSelected && !clerkUser) {
-        try {
-            await prepararConfiguracoes();
-        } catch (error) {
-            mostrarStatusConta(error.message, true);
-        }
-    }
-}));
-
-document.getElementById("email-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.submitter;
-    const newEmail = document.getElementById("new-email").value.trim();
-    button.disabled = true;
-    mostrarStatusConta("Enviando código de confirmação...");
-    try {
-        const user = await prepararConfiguracoes();
-        if (newEmail.toLowerCase() === user.primaryEmailAddress?.emailAddress?.toLowerCase()) {
-            throw new Error("Informe um e-mail diferente do atual.");
-        }
-        pendingEmailAddress = await user.createEmailAddress({ email: newEmail });
-        await pendingEmailAddress.prepareVerification({ strategy: "email_code" });
-        document.getElementById("email-verification-form").hidden = false;
-        mostrarStatusConta("Código enviado. Confira o novo e-mail para confirmar a troca.");
-    } catch (error) {
-        mostrarStatusConta(error.message, true);
-    } finally {
-        button.disabled = false;
-    }
-});
-
-document.getElementById("email-verification-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.submitter;
-    const code = document.getElementById("email-verification-code").value.trim();
-    if (!pendingEmailAddress) {
-        mostrarStatusConta("Solicite um novo código antes de confirmar.", true);
-        return;
-    }
-    button.disabled = true;
-    mostrarStatusConta("Confirmando novo e-mail...");
-    try {
-        await pendingEmailAddress.attemptVerification({ code });
-        await clerkUser.update({ primaryEmailAddressId: pendingEmailAddress.id });
-        document.getElementById("current-email").value = pendingEmailAddress.emailAddress;
-        document.getElementById("email-verification-form").hidden = true;
-        document.getElementById("email-verification-code").value = "";
-        pendingEmailAddress = null;
-        mostrarStatusConta("E-mail alterado com sucesso.");
-    } catch (error) {
-        mostrarStatusConta(error.message, true);
-    } finally {
-        button.disabled = false;
-    }
-});
-
-document.getElementById("password-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.submitter;
-    const currentPassword = document.getElementById("current-password").value;
-    const newPassword = document.getElementById("new-password").value;
-    const confirmPassword = document.getElementById("confirm-password").value;
-    if (newPassword !== confirmPassword) {
-        mostrarStatusConta("A confirmação da nova senha não confere.", true);
-        return;
-    }
-    button.disabled = true;
-    mostrarStatusConta("Alterando senha...");
-    try {
-        const user = await prepararConfiguracoes();
-        await user.updatePassword({ currentPassword, newPassword });
-        event.target.reset();
-        mostrarStatusConta("Senha alterada com sucesso.");
-    } catch (error) {
-        mostrarStatusConta(error.message, true);
-    } finally {
-        button.disabled = false;
-    }
-});
-
 renderProfile();
+loadPlanAccess();

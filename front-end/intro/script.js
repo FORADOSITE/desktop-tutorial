@@ -7,9 +7,7 @@
     0. VARIÁVEIS GLOBAIS   
    ========================================================= */
 
-const apiURL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:3000/api"
-    : "/api";
+const apiURL = "/api";
 
 
 /* =========================================================
@@ -28,16 +26,11 @@ const searchInput =
 const artistsGrid =
     document.getElementById("artistsGrid");
 
-const featuredProfiles =
-    document.getElementById("featuredProfiles");
-
 const categoryList =
     document.getElementById("categoryList");
 
 const servicesGrid =
     document.getElementById("servicesGrid");
-
-let availableProfiles = [];
 
 const newsletterForm =
     document.getElementById("newsletterForm");
@@ -309,61 +302,6 @@ window.addEventListener(
     6.1 - FILTRAR ARTISTAS
    ========================================================= */
 
-function renderArtistCards(profiles, target) {
-    target.innerHTML = "";
-    profiles.forEach((usuario) => {
-        const article = document.createElement("article");
-        article.className = "artist-card";
-        article.innerHTML = `
-            <div class="artist-image">
-                <img src="/front-end/intro/img/fds.png" alt="">
-                <span class="artist-tag"></span>
-            </div>
-            <div class="artist-info"><h3></h3><p></p></div>
-        `;
-        const image = article.querySelector("img");
-        image.src = usuario.image_perfil || "/front-end/intro/img/fds.png";
-        image.alt = usuario.nome || "Artista";
-        image.onerror = () => { image.src = "/front-end/intro/img/fds.png"; };
-        article.querySelector("h3").textContent = usuario.nome || "Artista";
-        article.querySelector("p").textContent = usuario.titulo || "Artista independente";
-        article.querySelector(".artist-tag").textContent = usuario.tipo || usuario.categoria || "ARTISTA";
-        article.addEventListener("click", () => {
-            const slug = usuario.slug || createProfileSlug(usuario.nome);
-            window.location.href = `../artista/index.html?perfil=${encodeURIComponent(slug)}`;
-        });
-        target.appendChild(article);
-        observeRevealElement(article);
-    });
-}
-
-function normalizeCategory(value) {
-    return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
-
-function createProfileSlug(value) {
-    return normalizeCategory(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-function profilesForCategory(categoryKey) {
-    const normalizedKey = normalizeCategory(categoryKey).replace(/\s+/g, "-");
-    if (["musica", "artista"].includes(categoryKey)) {
-        return availableProfiles.filter((profile) => !profile.categoria || ["musica", "artista"].includes(normalizeCategory(profile.categoria)));
-    }
-    return availableProfiles.filter((profile) => normalizeCategory(profile.categoria).replace(/\s+/g, "-") === normalizedKey);
-}
-
-function renderCategoryProfiles(categoryKey) {
-    if (!categoryDialogProfiles) return;
-    const profiles = profilesForCategory(categoryKey);
-    categoryDialogProfiles.replaceChildren();
-    if (!profiles.length) {
-        categoryDialogProfiles.textContent = "Nenhum perfil disponível nesta categoria ainda.";
-        return;
-    }
-    renderArtistCards(profiles, categoryDialogProfiles);
-}
-
 fetch(`${apiURL}/usuario/destaques`)
     .then((response) => {
         if (!response.ok) {
@@ -372,17 +310,35 @@ fetch(`${apiURL}/usuario/destaques`)
         return response.json();
     })
     .then((data) => {
-        availableProfiles = Array.isArray(data) ? data : [];
         artistsGrid.innerHTML = "";
 
-        if (!availableProfiles.length) {
+        if (!Array.isArray(data) || data.length === 0) {
             artistsGrid.innerHTML = '<p class="empty-artists">Ainda não há artistas cadastrados.</p>';
             return;
         }
 
-        const highlights = [...availableProfiles].sort((a, b) => Number(b.acessos || 0) - Number(a.acessos || 0)).slice(0, 3);
-        renderArtistCards(highlights, artistsGrid);
-        if (featuredProfiles) renderArtistCards(highlights, featuredProfiles);
+        data.forEach((usuario) => {
+            const article = document.createElement("article");
+            article.className = "artist-card";
+
+            article.innerHTML = `
+                <div class="artist-image">
+                    <img src="${usuario.image_perfil || "/front-end/intro/img/fds.png"}" onerror="this.onerror=null;this.src='/front-end/intro/img/fds.png'" alt="${usuario.nome}">
+                    <span class="artist-tag">ARTISTA</span>
+                </div>
+                <div class="artist-info">
+                    <h3>${usuario.nome || "Artista"}</h3>
+                    <p>${usuario.titulo || "Artista independente"}</p>
+                </div>
+            `;
+
+            article.addEventListener("click", () => {
+                window.location.href = `../artista/index.html?nome=${encodeURIComponent(usuario.nome)}`;
+            });
+
+            artistsGrid.appendChild(article);
+            observeRevealElement(article);
+        });
     })
     .catch((error) => {
         console.error("Erro ao carregar destaques:", error);
@@ -659,101 +615,7 @@ if (
 
 
 /* =========================================================
-   9. ESCOLHA DE PERFIL
-   ========================================================= */
-
-const categoryDialog = document.getElementById("category-dialog");
-const categoryDialogTitle = document.getElementById("category-dialog-title");
-const categoryDialogDescription = document.getElementById("category-dialog-description");
-const categoryProfileTypes = document.getElementById("category-profile-types");
-const categoryDialogAction = document.querySelector(".category-dialog-action");
-const categoryDialogClose = document.querySelector(".category-dialog-close");
-const categoryDialogProfiles = document.getElementById("category-dialog-profiles");
-const categoryDialogBrowse = document.getElementById("category-dialog-browse");
-const profileCategories = {
-    musica: {
-        title: "Música",
-        description: "Apresente sua identidade sonora, seus lançamentos e as colaborações que fazem parte da sua trajetória.",
-        types: ["Artista", "Beatmaker", "Produtor"],
-    },
-    audiovisual: {
-        title: "Audiovisual",
-        description: "Mostre seu olhar para imagens em movimento, do conceito à finalização de cada produção.",
-        types: ["Clipes", "Edições", "Visualizers"],
-    },
-    "artes-visuais": {
-        title: "Artes visuais",
-        description: "Crie um espaço para reunir seu portfólio, processos e obras que traduzem a sua linguagem.",
-        types: ["Pinturas", "Desenhos", "Ilustrações"],
-    },
-    literatura: {
-        title: "Literatura",
-        description: "Dê contexto às suas palavras e conecte leitores aos livros, poemas e histórias que você escreve.",
-        types: ["Livros", "Poemas", "Crônicas"],
-    },
-    danca: {
-        title: "Dança",
-        description: "Compartilhe seu movimento, seus trabalhos e os vídeos que revelam sua presença em cena.",
-        types: ["Vídeos de dança", "Coreografia", "Performance"],
-    },
-    moda: {
-        title: "Moda",
-        description: "Organize um portfólio visual para apresentar seu estilo, suas criações e seus ensaios.",
-        types: ["Fotos", "Styling", "Criação"],
-    },
-    projetos: {
-        title: "Projetos",
-        description: "Apresente uma iniciativa cultural com objetivos, equipe, referências e caminhos para colaboração.",
-        types: ["Projeto cultural", "Coletivo", "Iniciativa"],
-    },
-};
-
-function fecharCategoryDialog() {
-    if (categoryDialog?.open) categoryDialog.close();
-}
-
-document.querySelectorAll("[data-profile-category]").forEach((categoryButton) => {
-    categoryButton.addEventListener("click", () => {
-        const category = profileCategories[categoryButton.dataset.profileCategory];
-        if (!category || !categoryDialog) return;
-
-        categoryDialogTitle.textContent = category.title;
-        categoryDialogDescription.textContent = category.description;
-        renderCategoryProfiles(categoryButton.dataset.profileCategory);
-        categoryDialogBrowse.onclick = () => {
-            fecharCategoryDialog();
-            window.location.href = `/front-end/categoria/index.html?categoria=${encodeURIComponent(categoryButton.dataset.profileCategory)}`;
-        };
-        let selectedType = category.types[0];
-        const updateAction = () => {
-            categoryDialogAction.href = `/front-end/login/index.html?cadastro=1&categoria=${encodeURIComponent(category.title)}&tipo=${encodeURIComponent(selectedType)}`;
-        };
-        categoryProfileTypes.replaceChildren(...category.types.map((type, index) => {
-            const item = document.createElement("button");
-            item.type = "button";
-            item.className = "category-profile-type";
-            item.textContent = type;
-            item.classList.toggle("selected", index === 0);
-            item.addEventListener("click", () => {
-                selectedType = type;
-                categoryProfileTypes.querySelectorAll(".category-profile-type").forEach((option) => option.classList.toggle("selected", option === item));
-                updateAction();
-            });
-            return item;
-        }));
-        updateAction();
-        categoryDialog.showModal();
-    });
-});
-
-categoryDialogClose?.addEventListener("click", fecharCategoryDialog);
-categoryDialog?.addEventListener("click", (event) => {
-    if (event.target === categoryDialog) fecharCategoryDialog();
-});
-
-
-/* =========================================================
-   10. NEWSLETTER
+   9. NEWSLETTER
    ========================================================= */
 
 if (
@@ -1058,7 +920,44 @@ artistCards.forEach(
 
 
 /* =========================================================
-   14. BOTÕES DO HERO
+   14. BOTÕES DE CATEGORIA
+   ========================================================= */
+
+const categoryCards =
+    document.querySelectorAll(
+        ".category-card"
+    );
+
+
+categoryCards.forEach(
+    (card) => {
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                const categoryName =
+                    card
+                        .querySelector(
+                            "span:nth-child(2)"
+                        )
+                        ?.textContent ||
+                    "Categoria";
+
+
+                showNotification(
+                    `Buscando perfis de ${categoryName}.`
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   15. BOTÕES DO HERO
    ========================================================= */
 
 const heroButtons =

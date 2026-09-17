@@ -1,0 +1,170 @@
+{
+  "theme": {
+    "mode": "dark",
+    "style": "Cyberpunk Minimalist Underground",
+    "base_background": "#050505",
+    "card_background": "#0b0c0b",
+    "card_border": "rgba(255, 255, 255, 0.12)",
+    "accent_neon_green": "#9cff00",
+    "accent_neon_green_glow": "rgba(156, 255, 0, 0.25)",
+    "accent_neon_green_hover": "#b0ff32",
+    "text_primary": "#f2f2f2",
+    "text_muted": "#9d9f9a",
+    "text_dark": "#050505"
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Barlow Condensed, sans-serif",
+      "font_weight": "800 or 900",
+      "text_transform": "uppercase",
+      "letter_spacing": "0.02em",
+      "color": "#9cff00"
+    },
+    "body": {
+      "font_family": "Inter, sans-serif",
+      "font_weight": "400 or 500",
+      "color": "#f2f2f2"
+    },
+    "labels_eyebrows": {
+      "font_family": "Inter, sans-serif",
+      "font_weight": "800",
+      "letter_spacing": "0.2em",
+      "text_transform": "uppercase",
+      "color": "#9cff00"
+    }
+  },
+  "colors": {
+    "bg_main": "#050505",
+    "bg_card": "#0b0c0b",
+    "bg_card_hover": "#10140b",
+    "border_default": "rgba(255, 255, 255, 0.12)",
+    "border_active": "#9cff00",
+    "primary_neon": "#9cff00",
+    "glow_shadow": "0 0 25px rgba(156, 255, 0, 0.25)",
+    "text_light": "#f2f2f2",
+    "text_dim": "#9d9f9a",
+    "badge_bg": "rgba(156, 255, 0, 0.12)",
+    "badge_border": "rgba(156, 255, 0, 0.60)",
+    "badge_text": "#9cff00"
+  },
+  "grids_and_layouts": {
+    "catalog_grid": "grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
+    "summary_layout": "bento-style panel with 2 columns on desktop (1fr 1fr), stacked on mobile",
+    "responsive_breakpoints": "mobile: <768px, tablet: 768px-1100px, desktop: >1100px",
+    "padding": "clamp(24px, 4vw, 48px)"
+  },
+  "visual_enhancers": {
+    "neon_verified_badge": {
+      "style": "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-extrabold uppercase border tracking-wider",
+      "background": "rgba(156, 255, 0, 0.15)",
+      "border": "1px solid #9cff00",
+      "text_color": "#9cff00",
+      "box_shadow": "0 0 12px rgba(156, 255, 0, 0.35)",
+      "icon": "verified check SVG / shield icon"
+    },
+    "grid_background": "32px grid lines with 3.5% neon opacity overlaying #050505 background",
+    "cyber_cards": "1px subtle border with inner neon glow on hover and focus state"
+  },
+  "catalog_plans_definition": {
+    "gratuito": {
+      "title": "Gratuito",
+      "price": "R$ 0,00",
+      "period": "para sempre",
+      "features": [
+        "Perfil básico de artista",
+        "Até 1 prévia e 1 projeto fixado no perfil",
+        "Presença nas categorias da plataforma",
+        "Links para Instagram, Spotify e YouTube",
+        "Divulgação e pesquisa padrão"
+      ],
+      "badge": null
+    },
+    "premium": {
+      "title": "Premium",
+      "price": "R$ 19,90",
+      "period": "/mês",
+      "badge": "SELO NEON VERIFICADO",
+      "features": [
+        "Selo Premium de Verificado em Verde Neon",
+        "Maior destaque nos resultados de pesquisa",
+        "Perfil completo (até 3 prévias e 3 projetos fixados)",
+        "Destaque regional por Cidade, CEP e Estado",
+        "Estatísticas e contagem de cliques nos links/perfil (números anonimizados)",
+        "Participações prioritárias em seleções e destaques do site"
+      ]
+    },
+    "destaque": {
+      "title": "Destaque",
+      "price": "R$ 9,90",
+      "period": "/7 dias",
+      "badge": "TEMPORÁRIO",
+      "features": [
+        "Perfil temporariamente destacado dentro da categoria e região",
+        "Impulso imediato para lançamentos e eventos",
+        "Visibilidade priorizada na página principal e buscas"
+      ]
+    },
+    "premium_anual": {
+      "title": "Premium Anual",
+      "price": "R$ 199,90",
+      "period": "/ano",
+      "savings_notice": "ECONOMIZE R$ 238,80 (equivalente a 12 mensalidades de R$ 19,90 = R$ 238,80 de desconto!)",
+      "allowed_payment_methods": ["PIX", "DEBITO"],
+      "badge": "MELHOR VALOR",
+      "features": [
+        "Todas as vantagens do Plano Premium Mensal",
+        "Economia direta de R$ 238,80 por ano",
+        "Pagamento simplificado via Pix ou Cartão de Débito"
+      ]
+    }
+  },
+  "payment_and_location_step": {
+    "location_fields": [
+      { "name": "cep", "label": "CEP", "placeholder": "00000-000", "test_id": "input-location-cep" },
+      { "name": "cidade", "label": "Cidade", "placeholder": "Sua Cidade", "test_id": "input-location-cidade" },
+      { "name": "estado", "label": "Estado (UF)", "placeholder": "SP", "test_id": "input-location-estado" }
+    ],
+    "pix_instructions": {
+      "pix_email": "trysl4035@gmail.com",
+      "notice": "Copie a chave Pix acima ou utilize o QR Code gerado para realizar o pagamento instantâneo."
+    },
+    "debit_instructions": {
+      "developer_receiver_notice": "Transação processada para pessoa física (desenvolvedora e programadora do site): Isabela Ingrid Silva Costa (Trysla) - CPF ***.959.961-**",
+      "secure_fields": [
+        { "name": "card_number", "label": "Número do Cartão de Débito", "placeholder": "0000 0000 0000 0000", "type": "password_masked", "test_id": "input-debit-card-number" },
+        { "name": "card_holder", "label": "Nome Impresso no Cartão", "placeholder": "Nome do Titular", "type": "text", "test_id": "input-debit-card-holder" },
+        { "name": "cpf", "label": "CPF do Titular", "placeholder": "000.000.000-00", "type": "password_masked", "test_id": "input-debit-cpf" },
+        { "name": "expiry", "label": "Validade", "placeholder": "MM/AA", "type": "text", "test_id": "input-debit-expiry" },
+        { "name": "cvv", "label": "CVV", "placeholder": "123", "type": "password_masked", "test_id": "input-debit-cvv" }
+      ]
+    },
+    "mock_security_rule": "ALL payment operations are explicitly MOCKED. Real credentials or numbers must NEVER be logged, displayed publicly, or sent in plain text to real external gateways."
+  },
+  "motion_and_microinteractions": {
+    "hover_transitions": "transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+    "plan_card_hover": "transform: translateY(-4px); border-color: #9cff00; box-shadow: 0 0 20px rgba(156, 255, 0, 0.2)",
+    "button_press": "transform: scale(0.98); background: #b0ff32",
+    "badge_pulse": "subtle breathing opacity glow on neon verified badge"
+  },
+  "accessibility": {
+    "contrast": "WCAG AA high contrast text (#f2f2f2 or #9cff00 on #050505 / #0b0c0b background)",
+    "focus_states": "outline: 2px solid #9cff00; outline-offset: 2px",
+    "screen_readers": "aria-labels on interactive cards, plan options, and payment buttons"
+  },
+  "component_path": "/app/front-end/login/desing.js",
+  "instructions_to_main_agent": [
+    "Integrate the Subscription Catalog screen immediately following document verification in the registration workflow.",
+    "Maintain the existing underground cyberpunk visual hierarchy with black background (#050505), neon green headings (#9cff00), and bold condensed typography.",
+    "Display all 4 plan cards clearly: Gratuito, Premium, Destaque, and Premium Anual.",
+    "Ensure Premium Anual explicitly displays the savings of R$ 238,80 and only allows Pix and Debit card selection.",
+    "Ensure location fields (CEP, Cidade, Estado) are captured to enable region highlighting.",
+    "Ensure the developer identity notice (Isabela / Trysla) is presented clearly during checkout.",
+    "All form fields, buttons, plan choices, and confirmation containers MUST include data-testid attributes for testing.",
+    "Mock all payment submit actions with immediate visual confirmation feedback."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": {
+    "data_testid_requirement": "All buttons, inputs, selects, cards, and text summaries MUST have explicit data-testid attributes in kebab-case.",
+    "no_real_credentials": "Do not hardcode or reveal real unmasked card data in the public output UI.",
+    "styling_framework": "Pure CSS and vanilla JS / React JS matching existing styling variables (--auth-black, --auth-green, --auth-white, --font-title, --font-body)."
+  }
+}

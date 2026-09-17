@@ -106,7 +106,11 @@
 
                 </div>
 
-                <a class="btn btn-outline header-login" href="/front-end/login/index.html?cadastro=0">ENTRAR</a>
+                <div class="header-access" data-testid="home-header-access">
+                    <a class="header-login" data-testid="home-login-link" href="/front-end/login/index.html?cadastro=0">
+                        ENTRAR <span aria-hidden="true">↗</span>
+                    </a>
+                </div>
 
 
             </div>
@@ -178,8 +182,6 @@
                         </button>
 
                     </div>
-
-                    <div class="artists-grid featured-profiles" id="featuredProfiles"></div>
 
                 </div>
 
@@ -426,7 +428,7 @@
                 <div class="categories-grid">
 
 
-                    <button class="category-card" type="button" data-profile-category="musica">
+                    <button class="category-card">
 
                         <span class="category-card-icon">
                             ♫
@@ -443,7 +445,7 @@
                     </button>
 
 
-                    <button class="category-card" type="button" data-profile-category="audiovisual">
+                    <button class="category-card">
 
                         <span class="category-card-icon">
                             🎬
@@ -460,7 +462,7 @@
                     </button>
 
 
-                    <button class="category-card" type="button" data-profile-category="artes-visuais">
+                    <button class="category-card">
 
                         <span class="category-card-icon">
                             🔗
@@ -477,7 +479,7 @@
                     </button>
 
 
-                    <button class="category-card" type="button" data-profile-category="literatura">
+                    <button class="category-card">
 
                         <span class="category-card-icon">
                             📖
@@ -494,7 +496,7 @@
                     </button>
 
 
-                    <button class="category-card" type="button" data-profile-category="danca">
+                    <button class="category-card">
 
                         <span class="category-card-icon">
                             💃
@@ -511,7 +513,7 @@
                     </button>
 
 
-                    <button class="category-card" type="button" data-profile-category="moda">
+                    <button class="category-card">
 
                         <span class="category-card-icon">
                             👕
@@ -528,14 +530,14 @@
                     </button>
 
 
-                    <button class="category-card" type="button" data-profile-category="projetos">
+                    <button class="category-card">
 
                         <span class="category-card-icon">
                             ▦
                         </span>
 
                         <span>
-                            PROJETOS
+                            VER TODAS
                         </span>
 
                         <strong>
@@ -549,19 +551,6 @@
             </div>
 
         </section>
-
-        <dialog class="category-dialog" id="category-dialog" aria-labelledby="category-dialog-title">
-            <div class="category-dialog-panel">
-                <button class="category-dialog-close" type="button" aria-label="Fechar seleção">×</button>
-                <span class="eyebrow">PERFIL PERSONALIZADO</span>
-                <h2 id="category-dialog-title">Escolha seu caminho</h2>
-                <p id="category-dialog-description"></p>
-                <div class="category-profile-types" id="category-profile-types"></div>
-                <div class="category-dialog-profiles" id="category-dialog-profiles" aria-live="polite"></div>
-                <button class="btn btn-outline category-dialog-browse" id="category-dialog-browse" type="button">VER TODOS OS PERFIS</button>
-                <a class="btn btn-primary category-dialog-action" href="/front-end/login/index.html?cadastro=1">CRIAR ESTE PERFIL <span aria-hidden="true">→</span></a>
-            </div>
-        </dialog>
 
 
     </main>

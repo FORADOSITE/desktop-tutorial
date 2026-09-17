@@ -1,0 +1,6 @@
+backend/.env
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+backend/data/subscriptions.json

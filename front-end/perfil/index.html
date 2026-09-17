@@ -14,28 +14,18 @@
         <a class="profile-brand" href="/front-end/intro" aria-label="Voltar para o FORA DO SITE">
             <img src="/front-end/intro/img/logo.png" alt="FORA DO SITE">
         </a>
-        <div class="header-actions">
-            <a class="home-button" href="/front-end/intro/">Página inicial <span aria-hidden="true">→</span></a>
-            <button class="view-profile-button" id="view-profile-button" type="button">Salvar e ver perfil <span aria-hidden="true">→</span></button>
-        </div>
-        <span class="header-status"><i></i> PERFIL EM EDIÇÃO</span>
+        <div class="header-plan"><span class="header-status"><i></i> PERFIL EM EDIÇÃO</span><span id="plan-status" class="plan-status" data-testid="profile-plan-status">PLANO GRATUITO</span></div>
     </header>
 
     <main class="profile-layout">
         <section class="editor-column" aria-labelledby="editor-title">
             <div class="page-intro">
-                <a class="back-step" href="/front-end/escolha-perfil/index.html">← Voltar para a escolha do perfil</a>
                 <span class="eyebrow">PAINEL DO ARTISTA</span>
                 <h1 id="editor-title">SUA ARTE.<br><em>SUA REDE.</em></h1>
                 <p>Monte um perfil que mostre quem você é e o que está criando agora.</p>
             </div>
 
             <p id="status" class="status" role="status" aria-live="polite"></p>
-
-            <nav class="profile-tabs" aria-label="Seções do perfil">
-                <button class="profile-tab active" type="button" data-profile-tab="profile">Perfil</button>
-                <button class="profile-tab" type="button" data-profile-tab="settings">Configurações</button>
-            </nav>
 
             <section class="editor-section">
                 <div class="section-heading">
@@ -77,22 +67,12 @@
                 </form>
             </section>
 
-            <section class="editor-section" id="portfolio-section">
+            <section class="editor-section">
                 <div class="section-heading">
                     <span>03</span>
-                    <div><span class="eyebrow" id="portfolio-eyebrow">PORTFÓLIO</span><h2 id="portfolio-title">Seu trabalho</h2></div>
-                </div>
-                <p class="section-note" id="portfolio-note"></p>
-                <form id="portfolio-form" class="form-grid"></form>
-                <div id="portfolio-list" class="portfolio-list" aria-live="polite"></div>
-            </section>
-
-            <section class="editor-section" id="tracks-section">
-                <div class="section-heading">
-                    <span>04</span>
                     <div><span class="eyebrow">CATÁLOGO</span><h2>Prévias de música</h2></div>
                 </div>
-                <p class="section-note">Adicione trechos entre 15 e 30 segundos para as pessoas conhecerem seu som.</p>
+                <p class="section-note" id="track-limit-note" data-testid="profile-track-limit">Adicione 1 trecho entre 15 e 30 segundos para as pessoas conhecerem seu som.</p>
                 <form id="track-form" class="form-grid">
                     <label for="track-title">Nome da música</label>
                     <input id="track-title" maxlength="100" placeholder="Ex.: Noite Inteira" required>
@@ -106,87 +86,6 @@
                 </form>
                 <div id="track-list" class="track-list" aria-live="polite"></div>
             </section>
-
-            <section class="editor-section" id="projects-section">
-                <div class="section-heading">
-                    <span>05</span>
-                    <div><span class="eyebrow">PROJETOS</span><h2>Seus projetos</h2></div>
-                </div>
-                <p class="section-note">Escolha um formato. Cada projeto mostra apenas as informações necessárias para ele.</p>
-                <form id="project-form" class="form-grid">
-                    <label for="project-type">Tipo de projeto</label>
-                    <select id="project-type" required>
-                        <option value="edital">Edital</option>
-                        <option value="show">Show</option>
-                        <option value="batalha">Batalha</option>
-                    </select>
-
-                    <label for="project-description">Descrição</label>
-                    <textarea id="project-description" maxlength="900" rows="5" placeholder="Descreva seu projeto." required></textarea>
-
-                    <label for="project-logo">Logo</label>
-                    <input id="project-logo" type="file" accept="image/jpeg,image/png,image/webp" required>
-
-                    <div class="project-fields" data-project-fields="show" hidden>
-                        <label for="project-email">E-mail de contato</label>
-                        <input id="project-email" type="email" maxlength="160" placeholder="contato@exemplo.com">
-                        <label for="project-phone-one">Celular</label>
-                        <input id="project-phone-one" type="tel" maxlength="25" placeholder="(00) 00000-0000">
-                        <label for="project-phone-two">Segundo celular <small>opcional</small></label>
-                        <input id="project-phone-two" type="tel" maxlength="25" placeholder="(00) 00000-0000">
-                    </div>
-
-                    <div class="project-fields" data-project-fields="batalha" hidden>
-                        <label for="project-date">Data</label>
-                        <input id="project-date" type="date">
-                        <label for="project-time">Horário</label>
-                        <input id="project-time" type="time">
-                        <label for="project-location">Local</label>
-                        <input id="project-location" maxlength="180" placeholder="Endereço ou nome do espaço">
-                    </div>
-
-                    <div class="project-fields" data-project-fields="edital">
-                        <label for="project-pdf">PDF do edital</label>
-                        <input id="project-pdf" type="file" accept="application/pdf" required>
-                    </div>
-
-                    <button class="primary-button" type="submit">Adicionar projeto</button>
-                </form>
-                <div id="project-list" class="project-list" aria-live="polite"></div>
-            </section>
-
-            <section class="editor-section account-settings" id="account-settings" hidden>
-                <div class="section-heading">
-                    <span>06</span>
-                    <div><span class="eyebrow">CONTA</span><h2>Configurações</h2></div>
-                </div>
-                <p class="section-note">Atualize o e-mail de acesso ou defina uma nova senha para sua conta.</p>
-
-                <form id="email-form" class="form-grid account-form">
-                    <label for="current-email">E-mail atual</label>
-                    <input id="current-email" type="email" readonly>
-                    <label for="new-email">Novo e-mail</label>
-                    <input id="new-email" type="email" autocomplete="email" required>
-                    <button class="primary-button" type="submit">Enviar código para o novo e-mail</button>
-                </form>
-
-                <form id="email-verification-form" class="form-grid account-form" hidden>
-                    <label for="email-verification-code">Código enviado para o novo e-mail</label>
-                    <input id="email-verification-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
-                    <button class="primary-button" type="submit">Confirmar novo e-mail</button>
-                </form>
-
-                <form id="password-form" class="form-grid account-form">
-                    <label for="current-password">Senha atual</label>
-                    <input id="current-password" type="password" autocomplete="current-password" required>
-                    <label for="new-password">Nova senha</label>
-                    <input id="new-password" type="password" minlength="8" autocomplete="new-password" required>
-                    <label for="confirm-password">Confirmar nova senha</label>
-                    <input id="confirm-password" type="password" minlength="8" autocomplete="new-password" required>
-                    <button class="primary-button" type="submit">Alterar senha</button>
-                </form>
-                <p id="account-status" class="status" role="status" aria-live="polite"></p>
-            </section>
         </section>
 
         <aside class="preview-column" aria-labelledby="preview-title">
@@ -195,7 +94,8 @@
                 <div class="public-cover"></div>
                 <div class="public-content">
                     <img id="public-avatar" class="public-avatar" src="/front-end/intro/img/fds.png" alt="Foto do perfil">
-                    <span class="public-type">ARTISTA / CRIADOR</span>
+                    <span class="public-type" data-testid="profile-public-type">ARTISTA / CRIADOR</span>
+                    <span id="premium-badge" class="premium-badge" data-testid="profile-premium-badge" hidden>✓ PREMIUM VERIFICADO</span>
                     <h2 id="public-name">Seu nome</h2>
                     <p id="public-role">Seu título aparece aqui</p>
                     <p id="public-bio">Sua bio vai aparecer aqui quando você começar a escrever.</p>
@@ -203,10 +103,6 @@
                     <div class="public-tracks">
                         <div class="tracks-heading"><span>PRÉVIAS</span><span id="track-count">0 faixas</span></div>
                         <div id="public-tracks-list"><p class="empty-state">Suas músicas aparecerão aqui.</p></div>
-                    </div>
-                    <div class="public-projects">
-                        <div class="tracks-heading"><span>PROJETOS</span><span id="project-count">0 projetos</span></div>
-                        <div id="public-projects-list"><p class="empty-state">Seus projetos aparecerão aqui.</p></div>
                     </div>
                 </div>
             </div>

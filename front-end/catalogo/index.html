@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Escolha como seu perfil aparece no FORA DO SITE.">
+    <link rel="icon" type="image/png" href="/front-end/intro/img/fds.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/front-end/catalogo/style.css">
+    <title>Escolha seu plano | FORA DO SITE</title>
+</head>
+<body>
+    <header class="catalog-header">
+        <a class="catalog-brand" data-testid="catalog-brand-link" href="/front-end/intro" aria-label="Voltar para o início"><img src="/front-end/intro/img/logo.png" alt="FORA DO SITE"></a>
+        <div class="catalog-progress" data-testid="catalog-progress"><span>03</span><i></i><span>SEU PLANO</span></div>
+    </header>
+    <main class="catalog-shell">
+        <section class="catalog-intro" aria-labelledby="catalog-title">
+            <div>
+                <span class="eyebrow" data-testid="catalog-eyebrow">CATÁLOGO DE PERFIS</span>
+                <h1 id="catalog-title" data-testid="catalog-title">ESCOLHA COMO<br><em>APARECER.</em></h1>
+                <p data-testid="catalog-description">Comece no essencial ou desbloqueie mais espaço, alcance e presença regional para a sua arte.</p>
+            </div>
+            <div class="mock-notice" data-testid="catalog-mock-notice"><span>●</span><div><strong>PAGAMENTO MOCKADO</strong><small>Nenhum dado sensível é enviado ou armazenado. A confirmação é apenas uma simulação segura.</small></div></div>
+        </section>
+
+        <aside class="owner-access" id="owner-access" data-testid="owner-access-banner" hidden>
+            <span class="owner-access-icon" aria-hidden="true">✓</span>
+            <div><strong>ACESSO DA CRIADORA LIBERADO</strong><p>Esta conta recebe Premium Anual permanente, selo verificado e até 3 prévias sem cobrança.</p></div>
+        </aside>
+
+        <section class="plans-grid" id="plans-grid" aria-label="Planos disponíveis" data-testid="plans-grid">
+            <div class="loading-state" data-testid="plans-loading">Carregando planos...</div>
+        </section>
+
+        <section class="checkout-section" id="checkout-section" hidden aria-labelledby="checkout-title">
+            <div class="section-marker"><span>01</span><div><span class="eyebrow">CONFIGURAÇÃO</span><h2 id="checkout-title" data-testid="checkout-title">AJUSTE SEU<br><em>ALCANCE.</em></h2></div></div>
+            <div class="checkout-grid">
+                <form class="location-form" id="location-form">
+                    <fieldset>
+                        <legend data-testid="location-legend">Sua região</legend>
+                        <p class="form-help" data-testid="location-help">Para destacar seu perfil perto de quem está criando ao seu redor, informe sua localização.</p>
+                        <label for="location-city">Cidade</label>
+                        <input id="location-city" data-testid="input-location-cidade" name="cidade" autocomplete="address-level2" placeholder="Sua cidade" required>
+                        <label for="location-cep">CEP</label>
+                        <input id="location-cep" data-testid="input-location-cep" name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" required>
+                        <label for="location-state">Estado (UF)</label>
+                        <input id="location-state" data-testid="input-location-estado" name="estado" maxlength="2" autocomplete="address-level1" placeholder="SP" required>
+                    </fieldset>
+                </form>
+                <aside class="summary-panel" aria-label="Resumo da assinatura">
+                    <span class="eyebrow" data-testid="summary-eyebrow">RESUMO</span>
+                    <div class="summary-plan"><div><strong id="summary-plan-title" data-testid="summary-plan-title">—</strong><span id="summary-plan-period" data-testid="summary-plan-period">—</span></div><b id="summary-plan-price" data-testid="summary-plan-price">—</b></div>
+                    <div class="summary-divider"></div>
+                    <div class="payment-block" id="payment-block">
+                        <span class="summary-label" data-testid="payment-method-label">FORMA DE PAGAMENTO</span>
+                        <div class="payment-options" id="payment-options">
+                            <label class="payment-option"><input type="radio" name="paymentMethod" value="pix" checked><span data-testid="payment-method-pix">PIX</span></label>
+                            <label class="payment-option"><input type="radio" name="paymentMethod" value="debit"><span data-testid="payment-method-debit">CARTÃO DE DÉBITO</span></label>
+                        </div>
+                    </div>
+                    <div class="secure-fields" id="secure-fields" hidden>
+                        <p data-testid="secure-fields-warning">Não informe dados reais. Estes campos são apenas demonstrativos e não serão enviados.</p>
+                        <label for="debit-card-number">Número do cartão</label><input id="debit-card-number" data-testid="input-debit-card-number" type="text" inputmode="numeric" autocomplete="off" placeholder="0000 0000 0000 0000">
+                        <div class="secure-row"><div><label for="debit-expiry">Validade</label><input id="debit-expiry" data-testid="input-debit-expiry" type="text" autocomplete="off" placeholder="MM/AA"></div><div><label for="debit-cvv">CVV</label><input id="debit-cvv" data-testid="input-debit-cvv" type="password" inputmode="numeric" autocomplete="off" placeholder="•••"></div></div>
+                        <label for="debit-cpf">CPF do titular</label><input id="debit-cpf" data-testid="input-debit-cpf" type="password" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00">
+                    </div>
+                    <div class="pix-instructions" id="pix-instructions" data-testid="pix-instructions"><span>CHAVE PIX MOCKADA</span><strong data-testid="pix-key">trysl4035@gmail.com</strong><small>Após a confirmação, a assinatura será registrada apenas como simulação.</small></div>
+                    <p class="recipient-notice" id="recipient-notice" data-testid="recipient-notice">Pagamentos das categorias pagas são destinados à pessoa física responsável pelo site: Isabela Ingrid Silva Costa, conhecida artisticamente como Trysla.</p>
+                    <button class="confirm-button" id="confirm-button" data-testid="subscription-confirm-button" type="submit">Confirmar assinatura <span>↗</span></button>
+                    <p class="checkout-status" id="checkout-status" data-testid="checkout-status" role="status" aria-live="polite"></p>
+                    <a class="profile-link" id="profile-link" data-testid="subscription-profile-link" href="/front-end/perfil/index.html" hidden>Ir para meu perfil →</a>
+                </aside>
+            </div>
+        </section>
+    </main>
+    <script src="/front-end/auth/session.js"></script>
+    <script src="/front-end/catalogo/script.js"></script>
+</body>
+</html>

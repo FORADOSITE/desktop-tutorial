@@ -1,0 +1,257 @@
+[
+  {
+    "id": "sub_9c6b313d54fd",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "50000-000",
+      "cidade": "Recife",
+      "estado": "PE"
+    },
+    "createdAt": "2026-09-16T12:33:23.378566+00:00"
+  },
+  {
+    "id": "sub_c1bec2e1d1bf",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "50000-000",
+      "cidade": "Recife",
+      "estado": "PE"
+    },
+    "createdAt": "2026-09-16T12:33:36.216986+00:00"
+  },
+  {
+    "id": "sub_07c5803f5d42",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "50000-000",
+      "cidade": "Recife",
+      "estado": "PE"
+    },
+    "createdAt": "2026-09-16T12:34:13.102022+00:00"
+  },
+  {
+    "id": "sub_1a02c5392ad6",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "debit",
+    "location": {
+      "cep": "01000-000",
+      "cidade": "Seguro-d55b1f43",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T12:35:19.532400+00:00"
+  },
+  {
+    "id": "sub_9c5d8605dadd",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "88000-123",
+      "cidade": "Cidade-21e000df",
+      "estado": "SC"
+    },
+    "createdAt": "2026-09-16T12:35:19.573396+00:00"
+  },
+  {
+    "id": "sub_1789562373356",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "22000-123",
+      "cidade": "Cidade Browser Única",
+      "estado": "RJ"
+    },
+    "createdAt": "2026-09-16T12:39:33.356Z"
+  },
+  {
+    "id": "sub_d8d563810312",
+    "planId": "premium",
+    "planTitle": "Premium",
+    "period": "/mês",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "53000-000",
+      "cidade": "Olinda",
+      "estado": "PE"
+    },
+    "createdAt": "2026-09-16T13:44:31.289471+00:00"
+  },
+  {
+    "id": "sub_019be7641456",
+    "planId": "premium",
+    "planTitle": "Premium",
+    "period": "/mês",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "53000-000",
+      "cidade": "Olinda",
+      "estado": "PE"
+    },
+    "createdAt": "2026-09-16T13:44:49.360415+00:00"
+  },
+  {
+    "id": "sub_134c2bafa3fd",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "debit",
+    "location": {
+      "cep": "01000-000",
+      "cidade": "Seguro-5817c939",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T13:52:02.717501+00:00"
+  },
+  {
+    "id": "sub_afea79fd4bbf",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "88000-123",
+      "cidade": "Cidade-760a20ae",
+      "estado": "SC"
+    },
+    "createdAt": "2026-09-16T13:52:02.761605+00:00"
+  },
+  {
+    "id": "sub_1b792fc11576",
+    "planId": "premium",
+    "planTitle": "Premium",
+    "period": "/mês",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "04000-000",
+      "cidade": "tscheck-retrieval-24a9df97",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T13:52:02.801545+00:00"
+  },
+  {
+    "id": "sub_1789566819462",
+    "planId": "premium",
+    "planTitle": "Premium",
+    "period": "/mês",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "05000-000",
+      "cidade": "tscheck-premium-1789566819451",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T13:53:39.462Z"
+  },
+  {
+    "id": "sub_1789566864667",
+    "planId": "premium",
+    "planTitle": "Premium",
+    "period": "/mês",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "05000-000",
+      "cidade": "tscheck-premium-1789566864656",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T13:54:24.667Z"
+  },
+  {
+    "id": "sub_1789566989566",
+    "planId": "premium",
+    "planTitle": "Premium",
+    "period": "/mês",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "05000-000",
+      "cidade": "tscheck-premium-1789566989556",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T13:56:29.566Z"
+  },
+  {
+    "id": "sub_f74dad80b70e",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "debit",
+    "location": {
+      "cep": "01000-000",
+      "cidade": "Seguro-bf87bd38",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T13:58:42.375661+00:00"
+  },
+  {
+    "id": "sub_af03181b1152",
+    "planId": "premium-anual",
+    "planTitle": "Premium Anual",
+    "period": "/ano",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "88000-123",
+      "cidade": "Cidade-c8ce3eb3",
+      "estado": "SC"
+    },
+    "createdAt": "2026-09-16T13:58:42.420487+00:00"
+  },
+  {
+    "id": "sub_4425207784bd",
+    "planId": "premium",
+    "planTitle": "Premium",
+    "period": "/mês",
+    "status": "confirmed_mock",
+    "paymentMocked": true,
+    "paymentMethod": "pix",
+    "location": {
+      "cep": "04000-000",
+      "cidade": "tscheck-retrieval-cbec732b",
+      "estado": "SP"
+    },
+    "createdAt": "2026-09-16T13:58:42.463691+00:00"
+  }
+]

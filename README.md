@@ -1,92 +1,52 @@
 # FORA DO SITE
 
-## 📌 Sobre o projeto
+Plataforma de perfis para artistas e profissionais da cultura, com autenticação Clerk, catálogo de planos e editor de perfil.
 
-Este projeto foi desenvolvido com o objetivo de apresentar e organizar os arquivos e recursos do **FORA DO SITE** em um repositório GitHub.
+## Executar localmente
 
-## 🚀 Tecnologias utilizadas
+Requisitos: Python 3.11+ e Yarn.
 
-* HTML
-* CSS
-* JavaScript
-* Git
-* GitHub
-* Visual Studio Code
-
-> Altere esta seção conforme as tecnologias utilizadas no projeto.
-
-## 📂 Estrutura do projeto
-
-```text
-FORA DO SITE/
-│
-├── index.html
-├── css/
-├── js/
-├── images/
-└── README.md
-```
-
-> A estrutura acima é apenas um exemplo. Ajuste os nomes das pastas e arquivos de acordo com o seu projeto.
-
-## ⚙️ Como executar o projeto
-
-### 1. Clone o repositório
+Na primeira execução, instale as dependências:
 
 ```bash
-git clone URL_DO_SEU_REPOSITORIO
+yarn setup
 ```
 
-### 2. Entre na pasta
+Depois, inicie site e API juntos com um único comando:
 
 ```bash
-cd "FORA DO SITE"
+yarn dev
 ```
 
-### 3. Abra no Visual Studio Code
+Acesse **http://localhost:3000**. O mesmo servidor entrega as páginas e todas as rotas `/api`.
+
+> Não abra os HTMLs com `file://` e não use Live Server: essas opções não iniciam a API e causam `ERR_CONNECTION_REFUSED` em `/api/config`.
+
+## Configuração local
+
+Crie `backend/.env` a partir de `backend/.env.example` e preencha as chaves Clerk. O arquivo real é ignorado pelo Git e nunca deve ser publicado.
+
+```dotenv
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+OWNER_EMAIL=seu-email@exemplo.com
+APP_URL=http://localhost:3000
+```
+
+## Rotas principais
+
+- Cadastro/login: `/front-end/login/index.html?cadastro=1`
+- Verificação: `/front-end/verificacao-documento/index.html`
+- Catálogo: `/front-end/catalogo/index.html`
+- Perfil: `/front-end/perfil/index.html`
+- Configuração pública: `/api/config`
+
+## Teste rápido
+
+Com `yarn dev` ativo:
 
 ```bash
-code .
+curl http://localhost:3000/api/config
 ```
 
-### 4. Execute o projeto
-
-Abra o arquivo `index.html` no navegador ou utilize uma extensão como **Live Server** no VS Code.
-
-## 📥 Instalação
-
-Clone o projeto:
-
-```bash
-git clone URL_DO_SEU_REPOSITORIO
-```
-
-Depois, abra a pasta no VS Code:
-
-```bash
-code .
-```
-
-## 🛠️ Desenvolvimento
-
-Para realizar alterações no projeto:
-
-```bash
-git add .
-git commit -m "Descrição da alteração"
-git push
-```
-
-## 📌 Status do projeto
-
-🚧 Em desenvolvimento.
-
-## 👨‍💻 Autor
-
-**FORA DO SITE**
-
-Projeto desenvolvido utilizando Git, GitHub e Visual Studio Code.
-
-## 📄 Licença
-
-Este projeto está disponível para fins de desenvolvimento e aprendizado.
+A resposta deve conter apenas `clerkPublishableKey`; a chave secreta nunca é enviada ao navegador.

@@ -1,0 +1,72 @@
+{
+  "passed": 9,
+  "failed": 0,
+  "bugs": [],
+  "action_items": [],
+  "retest_needed": false,
+  "checks": [
+    {
+      "criterion": "O endpoint de catálogo fornece os quatro planos, valores, selo, economia e paymentMocked",
+      "name": "test_tscheck_catalog_plans.py::test_catalog_exposes_requested_plans_and_mocked_payment",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/catalog/plans returned 200; asserted four plan ids/prices, Premium neon badge, R$ 238,80 savings, and paymentMocked=true."
+    },
+    {
+      "criterion": "Confirmação de assinatura salva a localização no backend",
+      "name": "test_tscheck_subscription_persistence.py::test_subscription_confirmation_persists_unique_location",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/subscriptions returned 201; GET /api/subscriptions returned 200 and contained the test-created id with unique city, CEP, uppercase UF, plan and mocked status."
+    },
+    {
+      "criterion": "Dados sensíveis não são armazenados",
+      "name": "test_tscheck_sensitive_payment.py::test_subscription_does_not_persist_sensitive_payment_fields",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/subscriptions returned 201 with debit payload; response and subsequent GET row contained no card number, expiry, CVV or CPF keys."
+    },
+    {
+      "criterion": "Após a verificação documental, o botão de continuação abre o catálogo",
+      "name": "document-verification-opens-catalog",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Verification page button navigated to /front-end/catalogo/index.html and catalog heading was visible."
+    },
+    {
+      "criterion": "O catálogo exibe os quatro planos solicitados",
+      "name": "catalog-shows-four-plans",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Catalog rendered Gratuito, Premium, Destaque, Premium Anual with R$ 0,00, R$ 19,90, R$ 9,90 and R$ 199,90."
+    },
+    {
+      "criterion": "Premium apresenta o selo verde neon e Premium Anual explicita a economia",
+      "name": "catalog-highlights-premium-value",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Visible text included Selo neon verificado and Economize R$ 238,80 em relação a 12 mensalidades."
+    },
+    {
+      "criterion": "Localização é coletada no checkout e exigida antes da confirmação",
+      "name": "checkout-requires-location",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Checkout exposed Cidade, CEP and Estado fields; confirming empty form displayed the required location message."
+    },
+    {
+      "criterion": "Premium Anual oferece Pix e cartão de débito com campos demonstrativos seguros",
+      "name": "annual-checkout-offers-safe-debit-fields",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Annual checkout showed PIX and CARTÃO DE DÉBITO; debit selection exposed number, expiry, CVV and CPF fields plus warning that data will not be sent."
+    },
+    {
+      "criterion": "Confirmação mostra plano escolhido e localização persistida",
+      "name": "subscription-confirmation-shows-plan-and-location",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Filled unique browser location and submitted annual plan; checkout status showed Premium Anual, MOCKADA and backend persistence message."
+    }
+  ]
+}

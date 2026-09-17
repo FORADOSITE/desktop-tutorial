@@ -1,6 +1,0 @@
-backend/.env
-.env
-.vercel/
-node_modules/
-*.local
-*.local.*
