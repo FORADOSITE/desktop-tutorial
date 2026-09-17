@@ -1,0 +1,222 @@
+const apiBase = window.location.protocol === "file:" || ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname) && window.location.port !== "3000"
+    ? "http://localhost:3000/api"
+    : "/api";
+const UPLOAD_TIMEOUT_MS = 30000;
+const form = document.getElementById("verification-form");
+const statusElement = document.getElementById("status");
+const dataNascimentoElement = document.getElementById("data-nascimento");
+const nomeElement = document.getElementById("nome");
+const nomeContaElement = document.getElementById("nome-conta");
+const draftStorageKey = "fora-do-site-verification-draft";
+const editMode = new URLSearchParams(window.location.search).get("modo") === "editar";
+const deviceId = (() => {
+    try {
+        return localStorage.getItem("fora-do-site-device-id") || "";
+    } catch {
+        return "";
+    }
+})();
+
+function carregarRascunho() {
+    try {
+        const draft = JSON.parse(sessionStorage.getItem(draftStorageKey)) || {};
+        dataNascimentoElement.value = draft.dataNascimento || "";
+        document.getElementById("aceite-documentos").checked = draft.aceite === true;
+    } catch {
+        sessionStorage.removeItem(draftStorageKey);
+    }
+}
+
+function salvarRascunho() {
+    sessionStorage.setItem(draftStorageKey, JSON.stringify({
+        dataNascimento: dataNascimentoElement.value,
+        aceite: document.getElementById("aceite-documentos").checked,
+    }));
+}
+
+async function fetchComTimeout(url, options = {}, timeoutMs = UPLOAD_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } catch (error) {
+        if (error.name === "AbortError") {
+            throw new Error("O envio demorou demais. Verifique sua conexão e tente novamente.");
+        }
+        throw error;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+function dataLimiteParaMaioridade() {
+    const hoje = new Date();
+    return `${hoje.getFullYear() - 18}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
+}
+
+dataNascimentoElement.max = dataLimiteParaMaioridade();
+carregarRascunho();
+dataNascimentoElement.addEventListener("input", salvarRascunho);
+document.getElementById("aceite-documentos").addEventListener("change", salvarRascunho);
+
+function mostrarStatus(message, error = false) {
+    statusElement.textContent = message;
+    statusElement.classList.toggle("error", error);
+}
+
+function arquivoValido(arquivo) {
+    if (!arquivo || arquivo.size <= 0 || arquivo.size > 5 * 1024 * 1024) return false;
+    const mime = String(arquivo.type || "").toLowerCase();
+    const extensao = (arquivo.name || "").split(".").pop()?.toLowerCase();
+    const tiposAceitos = new Set(["image/jpeg", "image/png", "image/webp"]);
+    const extensoesAceitas = new Set(["jpg", "jpeg", "png", "webp"]);
+    return (tiposAceitos.has(mime) || (extensao && extensoesAceitas.has(extensao))) && arquivo.size <= 5 * 1024 * 1024;
+}
+
+function prepararDocumento(arquivo) {
+    const limitePixels = 1800;
+    const qualidade = 0.78;
+
+    return new Promise((resolve, reject) => {
+        const imagem = new Image();
+        const url = URL.createObjectURL(arquivo);
+        imagem.onload = () => {
+            URL.revokeObjectURL(url);
+            const escala = Math.min(1, limitePixels / Math.max(imagem.naturalWidth, imagem.naturalHeight));
+            const largura = Math.max(1, Math.round(imagem.naturalWidth * escala));
+            const altura = Math.max(1, Math.round(imagem.naturalHeight * escala));
+            const canvas = document.createElement("canvas");
+            canvas.width = largura;
+            canvas.height = altura;
+            const contexto = canvas.getContext("2d");
+            contexto.fillStyle = "#fff";
+            contexto.fillRect(0, 0, largura, altura);
+            contexto.drawImage(imagem, 0, 0, largura, altura);
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    reject(new Error("Não foi possível preparar a imagem do documento."));
+                    return;
+                }
+                resolve(new File([blob], `${arquivo.name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" }));
+            }, "image/jpeg", qualidade);
+        };
+        imagem.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("Não foi possível ler uma das imagens do documento."));
+        };
+        imagem.src = url;
+    });
+}
+
+function nomeDaConta(user) {
+    return [user.firstName, user.lastName].filter(Boolean).join(" ");
+}
+
+async function carregarClerk() {
+    const config = await fetch(`${apiBase}/config`).then((response) => response.json());
+    if (!config.clerkPublishableKey) throw new Error("A autenticação ainda não está configurada.");
+
+    const clerkDomain = atob(config.clerkPublishableKey.split("_")[2]).slice(0, -1);
+    const carregarScript = (src, attributes = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.crossOrigin = "anonymous";
+        script.src = src;
+        Object.entries(attributes).forEach(([name, value]) => script.setAttribute(name, value));
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+
+    await carregarScript(`https://${clerkDomain}/npm/@clerk/ui@1/dist/ui.browser.js`);
+    await carregarScript(`https://${clerkDomain}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, {
+        "data-clerk-publishable-key": config.clerkPublishableKey,
+    });
+    await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
+}
+
+async function iniciar() {
+    await carregarClerk();
+    if (!window.Clerk.user || !window.Clerk.session) {
+        window.location.href = "/front-end/login/index.html?cadastro=0";
+        return;
+    }
+
+    const nome = nomeDaConta(window.Clerk.user);
+    if (!nome) {
+        mostrarStatus("Cadastre seu nome e sobrenome antes de enviar o RG.", true);
+        return;
+    }
+    nomeElement.value = nome;
+    nomeContaElement.value = nome;
+    nomeElement.readOnly = true;
+
+    const email = window.Clerk.user.primaryEmailAddress;
+    if (email?.verification?.status !== "verified") {
+        mostrarStatus("Confirme seu e-mail antes de enviar o RG.", true);
+        return;
+    }
+
+    const token = await window.Clerk.session.getToken();
+    const response = await fetch(`${apiBase}/usuario/status`, {
+        headers: { Authorization: `Bearer ${token}`, "X-Device-Id": deviceId },
+    });
+    const status = await response.json().catch(() => ({}));
+    if (status.dispositivoPermitido === false) {
+        window.location.href = `/front-end/seguranca-dispositivo/index.html?email=${encodeURIComponent(status.email || "seu e-mail cadastrado")}`;
+        return;
+    }
+    if (status.verificado && !editMode) window.location.href = "/front-end/perfil/index.html";
+}
+
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.submitter || form.querySelector("button[type=\"submit\"]");
+    const frente = document.getElementById("documento-frente").files[0];
+    const verso = document.getElementById("documento-verso").files[0];
+
+    if (!nomeElement.value || nomeElement.value !== nomeContaElement.value) {
+        mostrarStatus("O nome e sobrenome precisam ser os mesmos do cadastro e do RG.", true);
+        return;
+    }
+
+    if (!frente || !verso || !arquivoValido(frente) || !arquivoValido(verso)) {
+        mostrarStatus("Envie a frente e o verso do RG em JPG, PNG ou WEBP de até 5 MB.", true);
+        return;
+    }
+
+    const dataNascimento = new Date(dataNascimentoElement.value);
+    const limiteMaioridade = new Date(dataLimiteParaMaioridade());
+    if (Number.isNaN(dataNascimento.getTime()) || dataNascimento > limiteMaioridade) {
+        mostrarStatus("É necessário ter 18 anos ou mais para criar um perfil.", true);
+        return;
+    }
+
+    button.disabled = true;
+    mostrarStatus("Otimizando documentos...");
+    try {
+        const token = await window.Clerk.session.getToken();
+        const dados = new FormData(form);
+        const [frenteOtimizada, versoOtimizado] = await Promise.all([
+            prepararDocumento(frente),
+            prepararDocumento(verso),
+        ]);
+        dados.set("documento_frente", frenteOtimizada, frenteOtimizada.name);
+        dados.set("documento_verso", versoOtimizado, versoOtimizado.name);
+        mostrarStatus("Enviando documentos...");
+        const response = await fetchComTimeout(`${apiBase}/usuario`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}`, "X-Device-Id": deviceId },
+            body: dados,
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.error || "Não foi possível concluir a verificação.");
+        sessionStorage.removeItem(draftStorageKey);
+        window.location.href = "/front-end/perfil/index.html";
+    } catch (error) {
+        mostrarStatus(error.message, true);
+        button.disabled = false;
+    }
+});
+
+iniciar().catch((error) => mostrarStatus(error.message, true));

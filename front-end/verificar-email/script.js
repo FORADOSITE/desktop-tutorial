@@ -1,0 +1,112 @@
+const email = sessionStorage.getItem("email_pendente_confirmacao") || new URLSearchParams(window.location.search).get("email");
+const emailElement = document.getElementById("email");
+const message = document.getElementById("message");
+const verificationForm = document.getElementById("verification-form");
+const verificationCode = document.getElementById("verification-code");
+const verifyCodeButton = document.getElementById("verify-code");
+const resendButton = document.getElementById("resend");
+const continueButton = document.getElementById("continue");
+let emailAddress;
+const isLocalDevelopment = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
+    && window.location.port !== "3000";
+const apiBase = window.location.protocol === "file:" || isLocalDevelopment
+    ? "http://localhost:3000/api"
+    : "/api";
+
+function carregarScript(src, attributes = {}) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.crossOrigin = "anonymous";
+        script.src = src;
+        Object.entries(attributes).forEach(([name, value]) => script.setAttribute(name, value));
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+async function carregarClerk() {
+    const response = await fetch(`${apiBase}/config`);
+    if (!response.ok) throw new Error("Não foi possível conectar à API. Inicie o servidor em localhost:3000.");
+    const config = await response.json();
+    if (!config.clerkPublishableKey) throw new Error("A autenticação ainda não está configurada.");
+    const clerkDomain = atob(config.clerkPublishableKey.split("_")[2]).slice(0, -1);
+    await carregarScript(`https://${clerkDomain}/npm/@clerk/ui@1/dist/ui.browser.js`);
+    await carregarScript(`https://${clerkDomain}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, {
+        "data-clerk-publishable-key": config.clerkPublishableKey,
+    });
+    await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
+    emailAddress = window.Clerk.user?.primaryEmailAddress;
+}
+
+async function verificarConfirmacao() {
+    await carregarClerk();
+    if (emailAddress?.verification?.status === "verified") {
+        sessionStorage.removeItem("email_pendente_confirmacao");
+        window.location.href = "/front-end/escolha-perfil/index.html";
+        return true;
+    }
+    return false;
+}
+
+async function prepararVerificacao() {
+    await carregarClerk();
+    if (!emailAddress) throw new Error("Sua sessão expirou. Volte ao cadastro e tente novamente.");
+    if (emailAddress.verification?.status !== "verified") {
+        await emailAddress.prepareVerification({ strategy: "email_code" });
+    }
+}
+
+if (email) emailElement.textContent = email;
+else {
+    emailElement.textContent = "o e-mail usado no cadastro";
+    verificationForm.querySelectorAll("input, button").forEach((element) => { element.disabled = true; });
+    resendButton.disabled = true;
+    message.textContent = "Volte ao cadastro para informar seu e-mail novamente.";
+}
+
+if (email) {
+    prepararVerificacao().catch((error) => {
+        message.textContent = error.message;
+    });
+}
+
+verificationForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    verifyCodeButton.disabled = true;
+    message.textContent = "Validando código...";
+    try {
+        await carregarClerk();
+        if (!emailAddress) throw new Error("Sua sessão expirou. Volte ao cadastro e tente novamente.");
+        await emailAddress.attemptVerification({ code: verificationCode.value.trim() });
+        sessionStorage.removeItem("email_pendente_confirmacao");
+        window.location.href = "/front-end/escolha-perfil/index.html";
+    } catch (error) {
+        message.textContent = error.message;
+        verifyCodeButton.disabled = false;
+    }
+});
+
+resendButton.addEventListener("click", async () => {
+    resendButton.disabled = true;
+    message.textContent = "Enviando...";
+    try {
+        await prepararVerificacao();
+        message.textContent = "Novo e-mail enviado. Confira sua caixa de entrada.";
+    } catch (error) {
+        message.textContent = error.message;
+        resendButton.disabled = false;
+    }
+});
+
+continueButton.addEventListener("click", async () => {
+    continueButton.disabled = true;
+    message.textContent = "Verificando confirmação...";
+    try {
+        if (!(await verificarConfirmacao())) message.textContent = "O e-mail ainda não foi confirmado.";
+    } catch (error) {
+        message.textContent = "Não foi possível verificar agora. Tente novamente.";
+    } finally {
+        continueButton.disabled = false;
+    }
+});

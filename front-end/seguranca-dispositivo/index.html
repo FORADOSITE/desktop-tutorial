@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/front-end/verificar-email/style.css">
+    <title>Confirme seu acesso | FORA DO SITE</title>
+</head>
+<body>
+    <main class="email-box">
+        <a href="/front-end/intro/index.html" class="email-brand">FORA DO SITE</a>
+        <p class="eyebrow">AVISO DE SEGURANÇA</p>
+        <h1>É você?</h1>
+        <p class="description">Detectamos um acesso por um dispositivo novo. Enviamos um código para <strong id="email">seu e-mail cadastrado</strong>.</p>
+        <div class="notice">Se você reconhece este acesso, informe o código recebido. Se não reconhece, bloqueie este dispositivo imediatamente.</div>
+        <form id="device-form">
+            <label for="security-code">Código de segurança</label>
+            <input id="security-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
+            <button id="confirm" type="submit">Confirmar que sou eu</button>
+        </form>
+        <div class="email-actions">
+            <button id="block" type="button">Não fui eu, bloquear acesso</button>
+        </div>
+        <p id="message" role="status"></p>
+        <a class="back" href="/front-end/login/index.html">Voltar para o login</a>
+    </main>
+    <script src="/front-end/seguranca-dispositivo/script.js"></script>
+</body>
+</html>
